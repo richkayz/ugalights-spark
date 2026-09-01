@@ -16,7 +16,7 @@ export type QuoteFormContext = {
   variantName: string | null;
   quantity: number;
   kind: "quote" | "bulk";
-  whatsapp?: string;
+  whatsapp?: string | undefined;
   pageUrl: string;
 };
 

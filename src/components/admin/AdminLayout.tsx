@@ -2,6 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import {
   BarChart3,
   Boxes,
+  FileText,
   FolderTree,
   Layout,
   LayoutDashboard,
@@ -21,6 +22,7 @@ const NAV = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { to: "/admin/orders/new", label: "New order", icon: PlusCircle },
+  { to: "/admin/quotes", label: "Quote requests", icon: FileText },
   { to: "/admin/products", label: "Products", icon: Package },
   { to: "/admin/categories", label: "Categories", icon: FolderTree },
   { to: "/admin/coupons", label: "Coupons", icon: Tag },
