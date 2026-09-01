@@ -87,17 +87,17 @@ function HomePage() {
                 className="absolute inset-0 h-full w-full object-cover opacity-40"
               />
             )}
-            <div className="relative container-page grid gap-6 py-16 md:py-24 lg:w-3/5">
+            <div className="relative container-page grid gap-6 py-16 md:py-24 lg:py-36 lg:w-3/5">
               {section.subtitle && (
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-highlight">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-highlight lg:text-base">
                   {section.subtitle}
                 </p>
               )}
-              <h1 className="font-display text-4xl font-extrabold leading-tight md:text-5xl lg:text-6xl">
+              <h1 className="font-display text-4xl font-extrabold leading-tight md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl">
                 {section.title}
               </h1>
               {str(section, "body") && (
-                <p className="max-w-xl text-base text-navy-foreground/85 md:text-lg">
+                <p className="max-w-xl text-base text-navy-foreground/85 md:text-lg lg:text-xl">
                   {str(section, "body")}
                 </p>
               )}
@@ -122,6 +122,7 @@ function HomePage() {
               </div>
             </div>
           </section>
+
         );
 
       case "why_us": {
