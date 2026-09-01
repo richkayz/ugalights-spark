@@ -92,19 +92,38 @@ const SECTION_META: Record<string, { label: string; hint: string; fields: FieldD
     hint: "Newest published products.",
     fields: [],
   },
-  testimonials: {
-    label: "Testimonials",
-    hint: "Customer quotes. Each item takes name, location and text.",
-    fields: [{ key: "items", label: "Testimonials", type: "items" }],
+  about_us: {
+    label: "About UGALights",
+    hint: "Short company story with a link to the full About page.",
+    fields: [
+      { key: "body", label: "About text", type: "textarea" },
+      { key: "button_text", label: "Button text", type: "text" },
+      { key: "button_link", label: "Button link", type: "text" },
+    ],
+  },
+  delivery_info: {
+    label: "Delivery & payment",
+    hint: "Delivery and payment tiles. Each item needs a heading and text.",
+    fields: [{ key: "items", label: "Delivery points", type: "items" }],
+  },
+  faq: {
+    label: "FAQs",
+    hint: "Questions and answers shown as expandable rows.",
+    fields: [{ key: "items", label: "FAQ entries", type: "items" }],
+  },
+  contact_info: {
+    label: "Contact details",
+    hint: "Phone and email come from Settings. Address, hours and note are edited here.",
+    fields: [
+      { key: "address", label: "Address", type: "text" },
+      { key: "hours", label: "Opening hours", type: "text" },
+      { key: "note", label: "Helper note", type: "textarea" },
+      { key: "button_text", label: "WhatsApp button text", type: "text" },
+    ],
   },
   whatsapp_cta: {
     label: "WhatsApp call to action",
     hint: "Encourages shoppers to chat on WhatsApp.",
-    fields: [{ key: "button_text", label: "Button text", type: "text" }],
-  },
-  newsletter: {
-    label: "Newsletter strip",
-    hint: "Offers sign-up strip near the bottom of the page.",
     fields: [{ key: "button_text", label: "Button text", type: "text" }],
   },
   footer: {
