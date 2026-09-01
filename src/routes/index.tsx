@@ -19,6 +19,15 @@ import { StoreLayout } from "@/components/storefront/StoreLayout";
 import { useStoreConfig } from "@/hooks/use-store-config";
 import { getHomepage } from "@/lib/storefront.functions";
 import { whatsappLink } from "@/lib/whatsapp";
+import {
+  canonicalLink,
+  canonicalMeta,
+  faqJsonLd,
+  ldScript,
+  localBusinessJsonLd,
+  socialImage,
+  websiteJsonLd,
+} from "@/lib/seo";
 import type { HomepageSection, ProductCardData } from "@/lib/store-types";
 
 export const Route = createFileRoute("/")({
@@ -460,8 +469,26 @@ function HomePage() {
     }
   }
 
+  const faqSection = data.sections.find((s) => s.section_key === "faq");
+  const faqPairs = (faqSection ? items(faqSection) : [])
+    .filter((item) => item["title"] && item["text"])
+    .map((item) => ({ question: item["title"]!, answer: item["text"]! }));
+
+  const structuredData = [
+    localBusinessJsonLd(settings),
+    websiteJsonLd(),
+    ...(faqPairs.length > 0 ? [faqJsonLd(faqPairs)] : []),
+  ];
+
   return (
     <StoreLayout announcement={announcement?.title || settings["announcement"]}>
+      {structuredData.map((data, index) => (
+        <script
+          key={index}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+        />
+      ))}
       {data.sections.map(renderSection)}
     </StoreLayout>
   );
