@@ -68,7 +68,7 @@ function AdminInventory() {
                 <li key={movement.id} className="px-4 py-2">
                   <div className="flex items-center justify-between">
                     <span className="font-medium">
-                      {productNames.get(movement.product_id) ?? "Product"}
+                      {productNames[movement.product_id] ?? "Product"}
                     </span>
                     <span
                       className={
