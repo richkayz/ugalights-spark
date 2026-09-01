@@ -92,19 +92,38 @@ const SECTION_META: Record<string, { label: string; hint: string; fields: FieldD
     hint: "Newest published products.",
     fields: [],
   },
-  testimonials: {
-    label: "Testimonials",
-    hint: "Customer quotes. Each item takes name, location and text.",
-    fields: [{ key: "items", label: "Testimonials", type: "items" }],
+  about_us: {
+    label: "About UGALights",
+    hint: "Short company story with a link to the full About page.",
+    fields: [
+      { key: "body", label: "About text", type: "textarea" },
+      { key: "button_text", label: "Button text", type: "text" },
+      { key: "button_link", label: "Button link", type: "text" },
+    ],
+  },
+  delivery_info: {
+    label: "Delivery & payment",
+    hint: "Delivery and payment tiles. Each item needs a heading and text.",
+    fields: [{ key: "items", label: "Delivery points", type: "items" }],
+  },
+  faq: {
+    label: "FAQs",
+    hint: "Questions and answers shown as expandable rows.",
+    fields: [{ key: "items", label: "FAQ entries", type: "items" }],
+  },
+  contact_info: {
+    label: "Contact details",
+    hint: "Phone and email come from Settings. Address, hours and note are edited here.",
+    fields: [
+      { key: "address", label: "Address", type: "text" },
+      { key: "hours", label: "Opening hours", type: "text" },
+      { key: "note", label: "Helper note", type: "textarea" },
+      { key: "button_text", label: "WhatsApp button text", type: "text" },
+    ],
   },
   whatsapp_cta: {
     label: "WhatsApp call to action",
     hint: "Encourages shoppers to chat on WhatsApp.",
-    fields: [{ key: "button_text", label: "Button text", type: "text" }],
-  },
-  newsletter: {
-    label: "Newsletter strip",
-    hint: "Offers sign-up strip near the bottom of the page.",
     fields: [{ key: "button_text", label: "Button text", type: "text" }],
   },
   footer: {
@@ -304,7 +323,10 @@ function SectionCard({
         {meta.fields.map((field) =>
           field.type === "items" ? (
             <label key={field.key} className="grid gap-1 text-sm md:col-span-2">
-              <span className="font-medium">{field.label} (one entry per line: title | text)</span>
+              <span className="font-medium">
+                {field.label} (one entry per line:{" "}
+                {section.section_key === "faq" ? "question | answer" : "title | text"})
+              </span>
               <Textarea
                 rows={4}
                 value={itemsToText(content[field.key], section.section_key)}
@@ -346,14 +368,10 @@ function SectionCard({
   );
 }
 
-function itemsToText(value: unknown, sectionKey: string): string {
+function itemsToText(value: unknown, _sectionKey: string): string {
   if (!Array.isArray(value)) return "";
   return (value as Record<string, string>[])
-    .map((item) =>
-      sectionKey === "testimonials"
-        ? [item["name"] ?? "", item["location"] ?? "", item["text"] ?? ""].join(" | ")
-        : [item["title"] ?? "", item["text"] ?? ""].join(" | "),
-    )
+    .map((item) => [item["title"] ?? "", item["text"] ?? ""].join(" | "))
     .join("\n");
 }
 
@@ -366,13 +384,8 @@ function textToItems(
   let error: string | null = null;
   for (const line of lines) {
     const parts = line.split("|").map((p) => p.trim());
-    if (sectionKey === "testimonials") {
-      if (parts.length < 3) error = "Use: name | location | quote";
-      items.push({ name: parts[0] ?? "", location: parts[1] ?? "", text: parts[2] ?? "" });
-    } else {
-      if (parts.length < 2) error = "Use: title | text";
-      items.push({ title: parts[0] ?? "", text: parts[1] ?? "" });
-    }
+    if (parts.length < 2) error = sectionKey === "faq" ? "Use: question | answer" : "Use: title | text";
+    items.push({ title: parts[0] ?? "", text: parts.slice(1).join(" | ") });
   }
   return { items, error };
 }
