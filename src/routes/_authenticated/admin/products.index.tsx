@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { formatUGX } from "@/lib/format";
 import { listAdminProducts, setProductFlags } from "@/lib/admin.functions";
 
-export const Route = createFileRoute("/_authenticated/admin/products")({
+export const Route = createFileRoute("/_authenticated/admin/products/")({
   head: () => ({
     meta: [
       { title: "Products | UGALights Admin" },
@@ -51,7 +51,14 @@ function AdminProducts() {
   });
 
   return (
-    <AdminLayout title="Products">
+    <AdminLayout
+      title="Products"
+      actions={
+        <Button asChild>
+          <Link to="/admin/products/new">New product</Link>
+        </Button>
+      }
+    >
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <Input
           placeholder="Search by name or SKU"
@@ -73,7 +80,7 @@ function AdminProducts() {
               <th className="px-4 py-3">Stock</th>
               <th className="px-4 py-3">Published</th>
               <th className="px-4 py-3">Featured</th>
-              <th className="px-4 py-3">View</th>
+              <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -159,14 +166,21 @@ function AdminProducts() {
                     aria-label="Featured"
                   />
                 </td>
-                <td className="px-4 py-3">
-                  <Link
-                    to="/product/$slug"
-                    params={{ slug: product.slug }}
-                    className="text-xs font-semibold text-primary hover:underline"
-                  >
-                    Storefront
-                  </Link>
+                <td className="px-4 py-3 text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <Button asChild size="sm" variant="secondary">
+                      <Link to="/admin/products/$id" params={{ id: product.id }}>
+                        Edit
+                      </Link>
+                    </Button>
+                    <Link
+                      to="/product/$slug"
+                      params={{ slug: product.slug }}
+                      className="text-xs font-semibold text-primary hover:underline"
+                    >
+                      View
+                    </Link>
+                  </div>
                 </td>
               </tr>
             ))}

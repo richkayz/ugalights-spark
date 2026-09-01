@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatDateTime, formatUGX, ORDER_STATUS_LABELS } from "@/lib/format";
 import { listAdminOrders } from "@/lib/admin.functions";
@@ -43,7 +44,14 @@ function AdminOrders() {
   });
 
   return (
-    <AdminLayout title="Orders">
+    <AdminLayout
+      title="Orders"
+      actions={
+        <Button asChild>
+          <Link to="/admin/orders/new">New manual order</Link>
+        </Button>
+      }
+    >
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <Input
           placeholder="Search order, name or phone"
