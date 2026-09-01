@@ -34,7 +34,9 @@ export const Route = createFileRoute("/product/$slug")({
       product.seo_description || product.short_description,
       `Buy ${product.name} in Uganda from UGALights. Genuine quality, UGX pricing, delivery in Kampala and countrywide.`,
     );
-    const title = `${product.seo_title || product.name} | Price in Uganda | UGALights`.slice(0, 70);
+    const base = product.seo_title || product.name;
+    const shortName = base.length > 44 ? `${base.slice(0, 43).trimEnd()}…` : base;
+    const title = `${shortName} | Price in Uganda | UGALights`;
     const path = `/product/${product.slug}`;
     return {
       meta: [
