@@ -135,12 +135,20 @@ export function SiteFooter() {
       <div className="border-t border-navy-foreground/15 py-5">
         <div className="container-page flex flex-col items-center justify-between gap-2 text-xs text-navy-foreground/70 md:flex-row">
           <p>
-            &copy; {new Date().getFullYear()} {settings["business_name"] ?? "UGALights"}. All rights
-            reserved.
+            Copyright 2026 © UGALights. All rights reserved. Powered by{" "}
+            <a
+              href="https://www.nyotaone.com"
+              target="_blank"
+              rel="noreferrer"
+              className="underline hover:text-navy-foreground"
+            >
+              NyotaOne
+            </a>
           </p>
           <p>{fc["bottom_note"] || "Prices in Ugandan Shillings (UGX)"}</p>
         </div>
       </div>
+
     </footer>
   );
 }
