@@ -31,12 +31,13 @@ export function StoreLayout({
   announcement?: string | undefined;
 }) {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col pb-16 md:pb-0">
       {announcement ? <AnnouncementBar text={announcement} /> : null}
       <SiteHeader />
       <main className="flex-1">{children}</main>
       <SiteFooter />
       <WhatsAppFloat />
+      <MobileTabBar />
     </div>
   );
 }
