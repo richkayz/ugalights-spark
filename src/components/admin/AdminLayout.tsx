@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   LogOut,
   Package,
+  PlusCircle,
   Settings,
   ShoppingBag,
   Tag,
@@ -19,7 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 const NAV = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
-  { to: "/admin/orders/new", label: "New order", icon: Package },
+  { to: "/admin/orders/new", label: "New order", icon: PlusCircle },
   { to: "/admin/products", label: "Products", icon: Package },
   { to: "/admin/categories", label: "Categories", icon: FolderTree },
   { to: "/admin/coupons", label: "Coupons", icon: Tag },
