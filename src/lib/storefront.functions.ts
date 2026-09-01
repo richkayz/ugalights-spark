@@ -21,17 +21,19 @@ export const getStoreConfig = createServerFn({ method: "GET" }).handler(
   async (): Promise<StoreConfig> => {
     const { publicClient } = await import("./supabase.server");
     const db = publicClient();
-    const [settings, categories] = await Promise.all([
+    const [settings, categories, footer] = await Promise.all([
       db.from("settings").select("key,value"),
       db
         .from("categories")
         .select("id,name,slug,image_url,parent_id,is_featured")
         .eq("is_active", true)
         .order("sort_order"),
+      db.from("homepage_sections").select("*").eq("section_key", "footer").maybeSingle(),
     ]);
     return {
       settings: toSettings(settings.data),
       categories: (categories.data ?? []) as NavCategory[],
+      footer: (footer.data ?? null) as unknown as HomepageSection | null,
     };
   },
 );

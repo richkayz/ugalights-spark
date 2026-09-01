@@ -285,3 +285,74 @@ export const updateAdminSetting = createServerFn({ method: "POST" })
     if (error) return { ok: false as const, message: error.message };
     return { ok: true as const };
   });
+
+// ===================== Homepage editor =====================
+
+export const listHomepageSections = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertStaff(context as any);
+    const db = (context as any).supabase;
+    const { data, error } = await db
+      .from("homepage_sections")
+      .select("id,section_key,title,subtitle,content,sort_order,is_enabled")
+      .order("sort_order");
+    if (error) return { sections: [], message: error.message };
+    return {
+      sections: (data ?? []) as {
+        id: string;
+        section_key: string;
+        title: string;
+        subtitle: string;
+        content: Record<string, any>;
+        sort_order: number;
+        is_enabled: boolean;
+      }[],
+    };
+  });
+
+export const saveHomepageSection = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        title: z.string().max(200).optional(),
+        subtitle: z.string().max(400).optional(),
+        content: z.record(z.string(), z.any()).optional(),
+        isEnabled: z.boolean().optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    await assertStaff(context as any);
+    const db = (context as any).supabase;
+    const patch: Record<string, unknown> = {};
+    if (data.title !== undefined) patch["title"] = data.title;
+    if (data.subtitle !== undefined) patch["subtitle"] = data.subtitle;
+    if (data.content !== undefined) patch["content"] = data.content;
+    if (data.isEnabled !== undefined) patch["is_enabled"] = data.isEnabled;
+    if (Object.keys(patch).length === 0) return { ok: true as const };
+    const { error } = await db.from("homepage_sections").update(patch).eq("id", data.id);
+    if (error) return { ok: false as const, message: error.message };
+    return { ok: true as const };
+  });
+
+/** Persists a new display order for homepage sections. */
+export const reorderHomepageSections = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ ids: z.array(z.string().uuid()).min(1).max(60) }).parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    await assertStaff(context as any);
+    const db = (context as any).supabase;
+    for (let i = 0; i < data.ids.length; i++) {
+      const { error } = await db
+        .from("homepage_sections")
+        .update({ sort_order: i + 1 })
+        .eq("id", data.ids[i]);
+      if (error) return { ok: false as const, message: error.message };
+    }
+    return { ok: true as const };
+  });

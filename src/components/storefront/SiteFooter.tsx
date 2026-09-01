@@ -13,7 +13,8 @@ const PAGES = [
 ];
 
 export function SiteFooter() {
-  const { settings, categories } = useStoreConfig();
+  const { settings, categories, footer } = useStoreConfig();
+  const fc = (footer?.content ?? {}) as Record<string, string>;
   const topCategories = categories.filter((c) => !c.parent_id).slice(0, 6);
 
   return (
@@ -24,7 +25,8 @@ export function SiteFooter() {
             <BrandLogo className="h-8 w-auto" />
           </div>
           <p className="text-sm text-navy-foreground/80">
-            {settings["footer_text"] ??
+            {fc["about_text"] ||
+              settings["footer_text"] ||
               "UGALights supplies quality lighting and electrical accessories across Uganda."}
           </p>
           <div className="flex gap-3">
@@ -51,7 +53,7 @@ export function SiteFooter() {
 
         <div>
           <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-highlight">
-            Shop
+            {fc["shop_heading"] || "Shop"}
           </h3>
           <ul className="space-y-2 text-sm text-navy-foreground/80">
             <li>
@@ -75,7 +77,7 @@ export function SiteFooter() {
 
         <div>
           <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-highlight">
-            Information
+            {fc["info_heading"] || "Information"}
           </h3>
           <ul className="space-y-2 text-sm text-navy-foreground/80">
             {PAGES.map((page) => (
@@ -90,7 +92,7 @@ export function SiteFooter() {
 
         <div>
           <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-highlight">
-            Get in touch
+            {fc["contact_heading"] || "Get in touch"}
           </h3>
           <ul className="space-y-3 text-sm text-navy-foreground/80">
             {settings["phone"] && (
@@ -122,7 +124,7 @@ export function SiteFooter() {
             &copy; {new Date().getFullYear()} {settings["business_name"] ?? "UGALights"}. All rights
             reserved.
           </p>
-          <p>Prices in Ugandan Shillings (UGX)</p>
+          <p>{fc["bottom_note"] || "Prices in Ugandan Shillings (UGX)"}</p>
         </div>
       </div>
     </footer>

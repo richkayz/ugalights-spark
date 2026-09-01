@@ -2,6 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import {
   BarChart3,
   Boxes,
+  Layout,
   LayoutDashboard,
   LogOut,
   Package,
@@ -20,6 +21,7 @@ const NAV = [
   { to: "/admin/inventory", label: "Inventory", icon: Boxes },
   { to: "/admin/customers", label: "Customers", icon: Users },
   { to: "/admin/reports", label: "Reports", icon: BarChart3 },
+  { to: "/admin/homepage", label: "Homepage", icon: Layout },
   { to: "/admin/settings", label: "Settings", icon: Settings },
 ] as const;
 

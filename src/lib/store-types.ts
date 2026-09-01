@@ -12,6 +12,7 @@ export type NavCategory = {
 export type StoreConfig = {
   settings: SettingsMap;
   categories: NavCategory[];
+  footer?: HomepageSection | null;
 };
 
 export type ProductCardData = {
@@ -43,10 +44,11 @@ export type CartLine = {
 export type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
 
 export type HomepageSection = {
+  id: string;
   section_key: string;
   title: string;
   subtitle: string;
-  content: Record<string, Json>;
+  content: Record<string, any>;
   sort_order: number;
   is_enabled: boolean;
 };
