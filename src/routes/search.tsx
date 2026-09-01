@@ -3,6 +3,7 @@ import { StoreLayout } from "@/components/storefront/StoreLayout";
 import { ProductListing, type ListingSearch } from "@/components/storefront/ProductListing";
 import { getShopProducts } from "@/lib/storefront.functions";
 import type { SortValue } from "@/components/storefront/ProductFilters";
+import { NOINDEX } from "@/lib/seo";
 
 const SORTS: SortValue[] = ["featured", "newest", "price_asc", "price_desc", "bestselling"];
 
@@ -35,6 +36,7 @@ export const Route = createFileRoute("/search")({
       },
       { property: "og:title", content: "Search Products | UGALights" },
       { property: "og:description", content: "Find the exact lighting product you need." },
+      ...NOINDEX,
     ],
   }),
   component: SearchPage,

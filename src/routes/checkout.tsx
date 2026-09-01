@@ -13,6 +13,7 @@ import { createOrder } from "@/lib/orders.functions";
 import { validateCoupon } from "@/lib/storefront.functions";
 import { useStoreConfig } from "@/hooks/use-store-config";
 import { orderMessage, whatsappLink } from "@/lib/whatsapp";
+import { NOINDEX } from "@/lib/seo";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/checkout")({
       },
       { property: "og:title", content: "Checkout | UGALights" },
       { property: "og:description", content: "Complete your UGALights lighting order." },
+      ...NOINDEX,
     ],
   }),
   component: CheckoutPage,

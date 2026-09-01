@@ -19,28 +19,50 @@ import { StoreLayout } from "@/components/storefront/StoreLayout";
 import { useStoreConfig } from "@/hooks/use-store-config";
 import { getHomepage } from "@/lib/storefront.functions";
 import { whatsappLink } from "@/lib/whatsapp";
+import {
+  canonicalLink,
+  canonicalMeta,
+  faqJsonLd,
+  localBusinessJsonLd,
+  socialImage,
+  websiteJsonLd,
+} from "@/lib/seo";
 import type { HomepageSection, ProductCardData } from "@/lib/store-types";
 
 export const Route = createFileRoute("/")({
   loader: () => getHomepage(),
-  head: () => ({
-    meta: [
-      { title: "UGALights | Lighting & Electrical Accessories in Uganda" },
-      {
-        name: "description",
-        content:
-          "Buy LED bulbs, solar power systems, chandeliers, flood lights, switches, sockets and cables in Uganda. Genuine products, fair prices, fast delivery.",
-      },
-      { property: "og:title", content: "UGALights | Lighting & Electrical Accessories Uganda" },
-      {
-        property: "og:description",
-        content:
-          "Uganda's lighting and electrical accessories store. Shop LED, solar and decorative lighting with countrywide delivery.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: ({ loaderData }) => {
+    const hero = loaderData?.sections.find((s) => s.section_key === "hero");
+    const heroImage =
+      typeof hero?.content?.["image_url"] === "string"
+        ? (hero.content["image_url"] as string)
+        : null;
+    return {
+      meta: [
+        { title: "Lighting & Electricals in Uganda | UGALights Kampala" },
+        {
+          name: "description",
+          content:
+            "Buy LED bulbs, solar power systems, chandeliers, flood lights, switches, sockets and cables in Uganda. Genuine products, fair prices, delivery in Kampala & countrywide.",
+        },
+        { property: "og:title", content: "UGALights | Lighting & Electrical Accessories Uganda" },
+        {
+          property: "og:description",
+          content:
+            "Uganda's lighting and electrical accessories store. Shop LED, solar and decorative lighting with countrywide delivery. Request a quote on WhatsApp.",
+        },
+        { property: "og:type", content: "website" },
+        { property: "og:site_name", content: "UGALights" },
+        { property: "og:locale", content: "en_UG" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "geo.region", content: "UG-102" },
+        { name: "geo.placename", content: "Kampala" },
+        ...socialImage(heroImage),
+        ...canonicalMeta("/"),
+      ],
+      links: canonicalLink("/"),
+    };
+  },
   component: HomePage,
 });
 
@@ -446,8 +468,26 @@ function HomePage() {
     }
   }
 
+  const faqSection = data.sections.find((s) => s.section_key === "faq");
+  const faqPairs = (faqSection ? items(faqSection) : [])
+    .filter((item) => item["title"] && item["text"])
+    .map((item) => ({ question: item["title"]!, answer: item["text"]! }));
+
+  const structuredData = [
+    localBusinessJsonLd(settings),
+    websiteJsonLd(),
+    ...(faqPairs.length > 0 ? [faqJsonLd(faqPairs)] : []),
+  ];
+
   return (
     <StoreLayout announcement={announcement?.title || settings["announcement"]}>
+      {structuredData.map((doc, index) => (
+        <script
+          key={index}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(doc) }}
+        />
+      ))}
       {data.sections.map(renderSection)}
     </StoreLayout>
   );

@@ -5,6 +5,7 @@ import { ContentPage } from "@/components/storefront/ContentPage";
 import { useStoreConfig } from "@/hooks/use-store-config";
 import { getPageContent } from "@/lib/storefront.functions";
 import { whatsappLink } from "@/lib/whatsapp";
+import { canonicalLink, canonicalMeta, localBusinessJsonLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/contact")({
   loader: () => getPageContent({ data: { pageKey: "contact" } }),
@@ -21,7 +22,9 @@ export const Route = createFileRoute("/contact")({
         { name: "description", content: description },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
+        ...canonicalMeta("/contact"),
       ],
+      links: canonicalLink("/contact"),
     };
   },
   component: ContactRoute,
@@ -36,6 +39,10 @@ function ContactRoute() {
       title={page?.title ?? "Contact us"}
       body={page?.body ?? "Our team is available to help with product advice, quotes and orders."}
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd(settings)) }}
+      />
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
         {settings["phone"] && (
           <a href={`tel:${settings["phone"]}`} className="card-surface flex items-center gap-3 p-4">
