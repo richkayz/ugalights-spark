@@ -12,6 +12,14 @@ import { QuoteRequestForm } from "@/components/storefront/QuoteRequestForm";
 import { parseBulkTiers, pricingMode, tierRangeLabel } from "@/lib/pricing";
 import { getProductPage } from "@/lib/storefront.functions";
 import { productEnquiryMessage, whatsappLink } from "@/lib/whatsapp";
+import {
+  breadcrumbJsonLd,
+  canonicalLink,
+  canonicalMeta,
+  clamp,
+  SITE_URL,
+  socialImage,
+} from "@/lib/seo";
 
 export const Route = createFileRoute("/product/$slug")({
   loader: async ({ params }) => {
@@ -22,26 +30,25 @@ export const Route = createFileRoute("/product/$slug")({
   head: ({ loaderData }) => {
     const product = loaderData?.product;
     if (!product) return {};
-    const description = (
-      product.seo_description ||
-      product.short_description ||
-      `Buy ${product.name} in Uganda from UGALights.`
-    ).slice(0, 155);
-    const title = `${product.seo_title || product.name} | UGALights`;
-    const image = product.main_image_url;
+    const description = clamp(
+      product.seo_description || product.short_description,
+      `Buy ${product.name} in Uganda from UGALights. Genuine quality, UGX pricing, delivery in Kampala and countrywide.`,
+    );
+    const title = `${product.seo_title || product.name} | Price in Uganda | UGALights`.slice(0, 70);
+    const path = `/product/${product.slug}`;
     return {
       meta: [
         { title },
         { name: "description", content: description },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
-        ...(image?.startsWith("https://")
-          ? [
-              { property: "og:image", content: image },
-              { name: "twitter:image", content: image },
-            ]
-          : []),
+        { property: "og:type", content: "product" },
+        { property: "og:site_name", content: "UGALights" },
+        { name: "twitter:card", content: "summary_large_image" },
+        ...socialImage(product.main_image_url),
+        ...canonicalMeta(path),
       ],
+      links: canonicalLink(path),
     };
   },
   component: ProductPage,
@@ -88,7 +95,10 @@ function ProductPage() {
     name: product!.name,
     description: product!.short_description || product!.name,
     sku: product!.sku,
-    image: gallery,
+    ...(product!.brand_name ? { brand: { "@type": "Brand", name: product!.brand_name } } : {}),
+    category: category?.name,
+    url: pageUrl,
+    image: gallery.map((url) => (url.startsWith("http") ? url : `${SITE_URL}${url}`)),
     ...(mode === "quote_only"
       ? {}
       : {
@@ -96,6 +106,9 @@ function ProductPage() {
             "@type": "Offer",
             price: String(price),
             priceCurrency: "UGX",
+            url: pageUrl,
+            itemCondition: "https://schema.org/NewCondition",
+            seller: { "@type": "Organization", name: "UGALights" },
             availability: outOfStock
               ? "https://schema.org/OutOfStock"
               : "https://schema.org/InStock",
@@ -121,6 +134,19 @@ function ProductPage() {
   return (
     <StoreLayout>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbJsonLd([
+              { name: "Home", path: "/" },
+              { name: "Shop", path: "/shop" },
+              ...(category ? [{ name: category.name, path: `/category/${category.slug}` }] : []),
+              { name: product!.name, path: `/product/${product!.slug}` },
+            ]),
+          ),
+        }}
+      />
       <div className="container-page py-8">
         <nav className="mb-6 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
           <Link to="/" className="hover:text-primary">

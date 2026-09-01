@@ -23,7 +23,6 @@ import {
   canonicalLink,
   canonicalMeta,
   faqJsonLd,
-  ldScript,
   localBusinessJsonLd,
   socialImage,
   websiteJsonLd,
@@ -482,11 +481,11 @@ function HomePage() {
 
   return (
     <StoreLayout announcement={announcement?.title || settings["announcement"]}>
-      {structuredData.map((data, index) => (
+      {structuredData.map((doc, index) => (
         <script
           key={index}
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(doc) }}
         />
       ))}
       {data.sections.map(renderSection)}
