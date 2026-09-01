@@ -12,6 +12,7 @@ export type NavCategory = {
 export type StoreConfig = {
   settings: SettingsMap;
   categories: NavCategory[];
+  footer?: HomepageSection | null;
 };
 
 export type ProductCardData = {
