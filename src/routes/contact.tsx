@@ -5,6 +5,7 @@ import { ContentPage } from "@/components/storefront/ContentPage";
 import { useStoreConfig } from "@/hooks/use-store-config";
 import { getPageContent } from "@/lib/storefront.functions";
 import { whatsappLink } from "@/lib/whatsapp";
+import { canonicalLink, canonicalMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/contact")({
   loader: () => getPageContent({ data: { pageKey: "contact" } }),
@@ -21,7 +22,9 @@ export const Route = createFileRoute("/contact")({
         { name: "description", content: description },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
+        ...canonicalMeta("/contact"),
       ],
+      links: canonicalLink("/contact"),
     };
   },
   component: ContactRoute,

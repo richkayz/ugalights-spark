@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { StoreLayout } from "@/components/storefront/StoreLayout";
 import { useCart } from "@/lib/cart";
 import { formatUGX } from "@/lib/format";
+import { NOINDEX } from "@/lib/seo";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/cart")({
       },
       { property: "og:title", content: "Your Cart | UGALights" },
       { property: "og:description", content: "Review your UGALights order before checkout." },
+      ...NOINDEX,
     ],
   }),
   component: CartPage,

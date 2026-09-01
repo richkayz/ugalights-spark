@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ContentPage } from "@/components/storefront/ContentPage";
 import { getPageContent } from "@/lib/storefront.functions";
+import { canonicalLink, canonicalMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/about")({
   loader: () => getPageContent({ data: { pageKey: "about" } }),
@@ -14,7 +15,9 @@ export const Route = createFileRoute("/about")({
         { name: "description", content: description },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
+        ...canonicalMeta("/about"),
       ],
+      links: canonicalLink("/about"),
     };
   },
   component: Page,

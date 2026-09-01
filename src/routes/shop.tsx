@@ -3,6 +3,7 @@ import { StoreLayout } from "@/components/storefront/StoreLayout";
 import { ProductListing, type ListingSearch } from "@/components/storefront/ProductListing";
 import { getShopProducts } from "@/lib/storefront.functions";
 import type { SortValue } from "@/components/storefront/ProductFilters";
+import { canonicalLink, canonicalMeta } from "@/lib/seo";
 
 const SORTS: SortValue[] = ["featured", "newest", "price_asc", "price_desc", "bestselling"];
 
@@ -39,7 +40,9 @@ export const Route = createFileRoute("/shop")({
         property: "og:description",
         content: "All UGALights lighting and electrical products, priced in UGX.",
       },
+      ...canonicalMeta("/shop"),
     ],
+    links: canonicalLink("/shop"),
   }),
   component: ShopPage,
 });
