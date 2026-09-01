@@ -169,25 +169,36 @@ function ProductPage() {
               )}
             </div>
 
-            <div className="flex flex-wrap items-baseline gap-3">
-              <span className="font-display text-3xl font-extrabold text-primary">
-                {formatUGX(price)}
-              </span>
-              {off != null && (
-                <>
-                  <span className="text-base text-muted-foreground line-through">
-                    {formatUGX(basePrice)}
-                  </span>
-                  <span className="rounded-md bg-sale px-2 py-0.5 text-xs font-semibold text-sale-foreground">
-                    Save {off}%
-                  </span>
-                </>
-              )}
-            </div>
+            {mode === "quote_only" ? (
+              <div className="rounded-lg border border-primary/30 bg-accent p-4">
+                <p className="font-display text-xl font-bold text-primary">Price on request</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Contact us for the latest price.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-baseline gap-3">
+                <span className="font-display text-3xl font-extrabold text-primary">
+                  {formatUGX(price)}
+                </span>
+                {off != null && (
+                  <>
+                    <span className="text-base text-muted-foreground line-through">
+                      {formatUGX(basePrice)}
+                    </span>
+                    <span className="rounded-md bg-sale px-2 py-0.5 text-xs font-semibold text-sale-foreground">
+                      Save {off}%
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
 
-            <p className={`text-sm font-medium ${outOfStock ? "text-sale" : "text-success"}`}>
-              {outOfStock ? "Out of stock" : `In stock (${stock} available)`}
-            </p>
+            {mode !== "quote_only" && (
+              <p className={`text-sm font-medium ${outOfStock ? "text-sale" : "text-success"}`}>
+                {outOfStock ? "Out of stock" : `In stock (${stock} available)`}
+              </p>
+            )}
 
             {variants.length > 0 && (
               <div>
@@ -231,9 +242,28 @@ function ProductPage() {
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
-              <Button size="lg" disabled={outOfStock} onClick={addToCart}>
-                Add to cart
-              </Button>
+              {mode === "quote_only" ? (
+                <Button size="lg" onClick={() => setShowQuote(true)}>
+                  <FileText className="mr-1 h-4 w-4" /> Get a quote
+                </Button>
+              ) : (
+                <>
+                  <Button size="lg" disabled={outOfStock} onClick={addToCart}>
+                    Add to cart
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    disabled={outOfStock}
+                    onClick={() => {
+                      addToCart();
+                      void navigate({ to: "/checkout" });
+                    }}
+                  >
+                    Buy now
+                  </Button>
+                </>
+              )}
               {settings["whatsapp"] && (
                 <Button asChild size="lg" variant="secondary">
                   <a
@@ -241,7 +271,7 @@ function ProductPage() {
                       settings["whatsapp"],
                       productEnquiryMessage({
                         productName: product!.name,
-                        url: `https://www.ugalights.com/product/${product!.slug}`,
+                        url: pageUrl,
                         variant: variant?.name ?? null,
                         quantity,
                       }),
@@ -249,11 +279,53 @@ function ProductPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <MessageCircle className="mr-1 h-4 w-4" /> Order on WhatsApp
+                    <MessageCircle className="mr-1 h-4 w-4" />{" "}
+                    {mode === "quote_only" ? "Ask on WhatsApp" : "Order on WhatsApp"}
                   </a>
                 </Button>
               )}
             </div>
+
+            {mode === "show_price_bulk" && (
+              <div className="rounded-lg border border-border bg-muted/60 p-4">
+                <p className="font-display text-sm font-bold">
+                  Need a larger quantity? Request bulk price
+                </p>
+                {tiers.length > 0 && (
+                  <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                    {tiers.map((tier, i) => (
+                      <li key={i} className="flex flex-wrap justify-between gap-2">
+                        <span>{tierRangeLabel(tier)}</span>
+                        <span className="font-medium text-foreground">
+                          {tier.price != null ? formatUGX(tier.price) : tier.note || "Contact for quotation"}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {!showQuote && (
+                  <Button className="mt-3" variant="secondary" onClick={() => setShowQuote(true)}>
+                    <FileText className="mr-2 h-4 w-4" /> Request bulk price
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {(showQuote || mode === "quote_only") && (
+              <QuoteRequestForm
+                context={{
+                  productId: product!.id,
+                  productName: product!.name,
+                  variantId: variant?.id ?? null,
+                  variantName: variant?.name ?? null,
+                  quantity,
+                  kind: mode === "quote_only" ? "quote" : "bulk",
+                  whatsapp: settings["whatsapp"],
+                  pageUrl,
+                }}
+              />
+            )}
+
 
             <div className="grid gap-2 rounded-lg bg-muted p-4 text-sm">
               <p className="flex items-center gap-2">
