@@ -34,7 +34,7 @@ export const Route = createFileRoute("/product/$slug")({
       product.seo_description || product.short_description,
       `Buy ${product.name} in Uganda from UGALights. Genuine quality, UGX pricing, delivery in Kampala and countrywide.`,
     );
-    const base = product.seo_title || product.name;
+    const base = (product.seo_title || product.name).replace(/\s*\|\s*UGALights\s*$/i, "").trim();
     const shortName = base.length > 44 ? `${base.slice(0, 43).trimEnd()}…` : base;
     const title = `${shortName} | Price in Uganda | UGALights`;
     const path = `/product/${product.slug}`;
