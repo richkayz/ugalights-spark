@@ -48,7 +48,7 @@ export type HomepageSection = {
   section_key: string;
   title: string;
   subtitle: string;
-  content: Record<string, Json>;
+  content: Record<string, any>;
   sort_order: number;
   is_enabled: boolean;
 };
