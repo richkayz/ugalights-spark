@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { formatUGX } from "@/lib/format";
 import { listAdminProducts, setProductFlags } from "@/lib/admin.functions";
 
-export const Route = createFileRoute("/_authenticated/admin/products")({
+export const Route = createFileRoute("/_authenticated/admin/products/")({
   head: () => ({
     meta: [
       { title: "Products | UGALights Admin" },
