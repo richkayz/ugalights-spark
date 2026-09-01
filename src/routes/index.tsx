@@ -1,12 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
+  Banknote,
   Clock,
+  HelpCircle,
   Mail,
   MapPin,
   MessageCircle,
+  PackageCheck,
   Phone,
   ShieldCheck,
+  Smartphone,
   Truck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -229,35 +233,73 @@ function HomePage() {
           </section>
         );
 
-      case "about_us":
+      case "about_us": {
+        const highlights = items(section);
+        const image = str(section, "image_url");
         return (
           <section key={section.id} className="border-y border-border bg-card">
-            <div className="container-page grid gap-4 py-12 lg:w-3/4">
-              <h2 className="section-title">{section.title}</h2>
-              {section.subtitle && (
-                <p className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
-                  {section.subtitle}
-                </p>
-              )}
-              {str(section, "body") && (
-                <p className="text-sm leading-relaxed text-muted-foreground md:text-base">
-                  {str(section, "body")}
-                </p>
-              )}
-              {str(section, "button_text") && (
-                <Button asChild variant="secondary" className="w-fit">
-                  <Link to={(str(section, "button_link") ?? "/about") as string}>
-                    {str(section, "button_text")}
-                  </Link>
-                </Button>
+            <div className="container-page grid items-center gap-10 py-14 lg:grid-cols-2">
+              <div className="grid gap-4">
+                {section.subtitle && (
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                    {section.subtitle}
+                  </p>
+                )}
+                <h2 className="section-title">{section.title}</h2>
+                {str(section, "body") && (
+                  <p className="text-sm leading-relaxed text-muted-foreground md:text-base">
+                    {str(section, "body")}
+                  </p>
+                )}
+                {highlights.length > 0 && (
+                  <ul className="mt-1 grid gap-3 sm:grid-cols-2">
+                    {highlights.map((item, index) => (
+                      <li key={index} className="flex gap-2">
+                        <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                        <span className="text-sm">
+                          <span className="font-semibold">{item["title"]}</span>
+                          {item["text"] && (
+                            <span className="text-muted-foreground"> — {item["text"]}</span>
+                          )}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <div className="mt-2 flex flex-wrap gap-3">
+                  {str(section, "button_text") && (
+                    <Button asChild variant="secondary" className="w-fit">
+                      <Link to={(str(section, "button_link") ?? "/about") as string}>
+                        {str(section, "button_text")}
+                      </Link>
+                    </Button>
+                  )}
+                  <Button asChild variant="outline" className="w-fit">
+                    <Link to="/shop">
+                      Browse the catalogue <ArrowRight className="ml-1 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+              {image && (
+                <div className="overflow-hidden rounded-2xl border border-border">
+                  <img
+                    src={image}
+                    alt={`${section.title} — UGALights lighting showroom`}
+                    loading="lazy"
+                    className="h-full max-h-96 w-full object-cover"
+                  />
+                </div>
               )}
             </div>
           </section>
         );
+      }
 
       case "delivery_info": {
         const list = items(section);
         if (list.length === 0) return null;
+        const icons = [Truck, MapPin, Banknote, Smartphone, PackageCheck];
         return (
           <section key={section.id} className="container-page py-12">
             <h2 className="section-title">{section.title}</h2>
@@ -265,15 +307,21 @@ function HomePage() {
               <p className="mt-1 text-sm text-muted-foreground">{section.subtitle}</p>
             )}
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {list.map((item, index) => (
-                <div key={index} className="card-surface flex flex-col gap-2 p-5">
-                  <span className="w-fit rounded-lg bg-accent p-2 text-primary">
-                    <Truck className="h-5 w-5" />
-                  </span>
-                  <p className="text-sm font-semibold">{item["title"]}</p>
-                  <p className="text-xs leading-relaxed text-muted-foreground">{item["text"]}</p>
-                </div>
-              ))}
+              {list.map((item, index) => {
+                const Icon = icons[index % icons.length]!;
+                return (
+                  <div
+                    key={index}
+                    className="card-surface flex flex-col gap-2 p-5 transition-shadow hover:shadow-md"
+                  >
+                    <span className="w-fit rounded-lg bg-accent p-2 text-primary">
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <p className="text-sm font-semibold">{item["title"]}</p>
+                    <p className="text-xs leading-relaxed text-muted-foreground">{item["text"]}</p>
+                  </div>
+                );
+              })}
             </div>
           </section>
         );
@@ -285,15 +333,19 @@ function HomePage() {
         return (
           <section key={section.id} className="bg-accent py-12">
             <div className="container-page">
-              <h2 className="section-title">{section.title}</h2>
-              {section.subtitle && (
-                <p className="mt-1 text-sm text-muted-foreground">{section.subtitle}</p>
-              )}
+              <div className="flex items-center gap-2 text-primary">
+                <HelpCircle className="h-5 w-5" />
+                <span className="text-xs font-semibold uppercase tracking-[0.18em]">
+                  {section.subtitle || "Support"}
+                </span>
+              </div>
+              <h2 className="section-title mt-2">{section.title}</h2>
               <div className="mt-6 grid gap-3 lg:grid-cols-2">
                 {list.map((item, index) => (
-                  <details key={index} className="card-surface p-4">
-                    <summary className="cursor-pointer text-sm font-semibold">
+                  <details key={index} className="card-surface group p-4">
+                    <summary className="flex cursor-pointer items-center justify-between gap-3 text-sm font-semibold [&::-webkit-details-marker]:hidden">
                       {item["title"]}
+                      <ArrowRight className="h-4 w-4 shrink-0 text-primary transition-transform group-open:rotate-90" />
                     </summary>
                     <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
                       {item["text"]}

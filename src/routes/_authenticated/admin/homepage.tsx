@@ -94,9 +94,11 @@ const SECTION_META: Record<string, { label: string; hint: string; fields: FieldD
   },
   about_us: {
     label: "About UGALights",
-    hint: "Short company story with a link to the full About page.",
+    hint: "Short company story, highlight points, side image and a link to the full About page.",
     fields: [
       { key: "body", label: "About text", type: "textarea" },
+      { key: "items", label: "Highlight points", type: "items" },
+      { key: "image_url", label: "Side image URL", type: "text" },
       { key: "button_text", label: "Button text", type: "text" },
       { key: "button_link", label: "Button link", type: "text" },
     ],
