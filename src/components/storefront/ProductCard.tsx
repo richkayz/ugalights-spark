@@ -1,11 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { discountPercent, effectivePrice, formatUGX } from "@/lib/format";
+import { pricingMode } from "@/lib/pricing";
 import type { ProductCardData } from "@/lib/store-types";
 
 export function ProductCard({ product }: { product: ProductCardData }) {
   const price = effectivePrice(Number(product.price), product.sale_price ? Number(product.sale_price) : null);
   const off = discountPercent(Number(product.price), product.sale_price ? Number(product.sale_price) : null);
   const outOfStock = product.stock_quantity <= 0 || product.stock_status === "out_of_stock";
+  const mode = pricingMode(product.pricing_mode);
+  const quoteOnly = mode === "quote_only";
 
   return (
     <Link
@@ -45,17 +48,29 @@ export function ProductCard({ product }: { product: ProductCardData }) {
       <div className="flex flex-1 flex-col gap-1 p-3">
         <h3 className="line-clamp-2 text-sm font-semibold leading-snug">{product.name}</h3>
         <div className="mt-auto pt-2">
-          <div className="flex flex-wrap items-baseline gap-2">
-            <span className="font-display text-base font-bold text-primary">{formatUGX(price)}</span>
-            {off != null && (
-              <span className="text-xs text-muted-foreground line-through">
-                {formatUGX(product.price)}
-              </span>
-            )}
-          </div>
-          <p className={`mt-1 text-xs ${outOfStock ? "text-muted-foreground" : "text-success"}`}>
-            {outOfStock ? "Out of stock" : "In stock"}
-          </p>
+          {quoteOnly ? (
+            <>
+              <span className="font-display text-sm font-bold text-primary">Price on request</span>
+              <p className="mt-1 text-xs text-muted-foreground">Get a quote</p>
+            </>
+          ) : (
+            <>
+              <div className="flex flex-wrap items-baseline gap-2">
+                <span className="font-display text-base font-bold text-primary">{formatUGX(price)}</span>
+                {off != null && (
+                  <span className="text-xs text-muted-foreground line-through">
+                    {formatUGX(product.price)}
+                  </span>
+                )}
+              </div>
+              <p className={`mt-1 text-xs ${outOfStock ? "text-muted-foreground" : "text-success"}`}>
+                {outOfStock ? "Out of stock" : "In stock"}
+              </p>
+              {mode === "show_price_bulk" && (
+                <p className="mt-1 text-xs text-highlight-foreground/80">Bulk pricing available</p>
+              )}
+            </>
+          )}
         </div>
       </div>
     </Link>

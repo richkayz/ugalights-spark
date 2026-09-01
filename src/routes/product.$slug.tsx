@@ -1,6 +1,6 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { MessageCircle, Minus, Plus, ShieldCheck, Truck } from "lucide-react";
+import { FileText, MessageCircle, Minus, Plus, ShieldCheck, Truck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { StoreLayout } from "@/components/storefront/StoreLayout";
@@ -8,6 +8,8 @@ import { ProductGrid } from "@/components/storefront/ProductCard";
 import { useStoreConfig } from "@/hooks/use-store-config";
 import { useCart } from "@/lib/cart";
 import { discountPercent, effectivePrice, formatUGX } from "@/lib/format";
+import { QuoteRequestForm } from "@/components/storefront/QuoteRequestForm";
+import { parseBulkTiers, pricingMode, tierRangeLabel } from "@/lib/pricing";
 import { getProductPage } from "@/lib/storefront.functions";
 import { productEnquiryMessage, whatsappLink } from "@/lib/whatsapp";
 
@@ -52,6 +54,12 @@ function ProductPage() {
   const [variantId, setVariantId] = useState<string | null>(variants[0]?.id ?? null);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(product!.main_image_url ?? images[0]?.url ?? null);
+  const [showQuote, setShowQuote] = useState(false);
+  const navigate = useNavigate();
+
+  const mode = pricingMode((product as any)!.pricing_mode);
+  const tiers = useMemo(() => parseBulkTiers((product as any)!.bulk_tiers), [product]);
+  const pageUrl = `https://www.ugalights.com/product/${product!.slug}`;
 
   const variant = variants.find((v) => v.id === variantId) ?? null;
   const basePrice = Number(variant?.price ?? product!.price);
@@ -81,12 +89,18 @@ function ProductPage() {
     description: product!.short_description || product!.name,
     sku: product!.sku,
     image: gallery,
-    offers: {
-      "@type": "Offer",
-      price: String(price),
-      priceCurrency: "UGX",
-      availability: outOfStock ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
-    },
+    ...(mode === "quote_only"
+      ? {}
+      : {
+          offers: {
+            "@type": "Offer",
+            price: String(price),
+            priceCurrency: "UGX",
+            availability: outOfStock
+              ? "https://schema.org/OutOfStock"
+              : "https://schema.org/InStock",
+          },
+        }),
   };
 
   function addToCart() {
