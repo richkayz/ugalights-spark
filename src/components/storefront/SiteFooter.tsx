@@ -93,15 +93,27 @@ export function SiteFooter() {
 
         <div>
           <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-highlight">
-            {fc["contact_heading"] || "Get in touch"}
+            {fc["contact_heading"] || "Talk To Us?"}
           </h3>
           <ul className="space-y-3 text-sm text-navy-foreground/80">
-            {settings["phone"] && (
-              <li className="flex items-start gap-2">
-                <Phone className="mt-0.5 h-4 w-4 shrink-0" />
-                <a href={`tel:${settings["phone"]}`}>{settings["phone"]}</a>
-              </li>
-            )}
+            <li className="flex items-start gap-2">
+              <MessageCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>
+                Whatsapp or Calls:{" "}
+                <a
+                  href="https://wa.me/256775912186"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-navy-foreground"
+                >
+                  0775912186
+                </a>
+                {" / "}
+                <a href="tel:0709887997" className="hover:text-navy-foreground">
+                  0709887997
+                </a>
+              </span>
+            </li>
             {settings["email"] && (
               <li className="flex items-start gap-2">
                 <Mail className="mt-0.5 h-4 w-4 shrink-0" />
@@ -117,6 +129,7 @@ export function SiteFooter() {
             {settings["opening_hours"] && <li>{settings["opening_hours"]}</li>}
           </ul>
         </div>
+
       </div>
 
       <div className="border-t border-navy-foreground/15 py-5">
