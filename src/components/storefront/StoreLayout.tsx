@@ -15,7 +15,7 @@ export function WhatsAppFloat() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat with UGALights on WhatsApp"
-      className="fixed bottom-5 right-4 z-40 flex h-13 items-center gap-2 rounded-full bg-success px-4 py-3 text-sm font-semibold text-success-foreground shadow-lift transition-transform hover:scale-105"
+      className="fixed bottom-5 right-4 z-40 hidden h-13 items-center gap-2 rounded-full bg-success px-4 py-3 text-sm font-semibold text-success-foreground shadow-lift transition-transform hover:scale-105 md:flex"
     >
       <MessageCircle className="h-5 w-5" />
       <span className="hidden sm:inline">WhatsApp</span>
