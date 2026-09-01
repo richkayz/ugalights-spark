@@ -1,0 +1,301 @@
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import { MessageCircle, Minus, Plus, ShieldCheck, Truck } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { StoreLayout } from "@/components/storefront/StoreLayout";
+import { ProductGrid } from "@/components/storefront/ProductCard";
+import { useStoreConfig } from "@/hooks/use-store-config";
+import { useCart } from "@/lib/cart";
+import { discountPercent, effectivePrice, formatUGX } from "@/lib/format";
+import { getProductPage } from "@/lib/storefront.functions";
+import { productEnquiryMessage, whatsappLink } from "@/lib/whatsapp";
+
+export const Route = createFileRoute("/product/$slug")({
+  loader: async ({ params }) => {
+    const result = await getProductPage({ data: { slug: params.slug } });
+    if (!result.product) throw notFound();
+    return result;
+  },
+  head: ({ loaderData }) => {
+    const product = loaderData?.product;
+    if (!product) return {};
+    const description = (
+      product.seo_description ||
+      product.short_description ||
+      `Buy ${product.name} in Uganda from UGALights.`
+    ).slice(0, 155);
+    const title = `${product.seo_title || product.name} | UGALights`;
+    const image = product.main_image_url;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        ...(image?.startsWith("https://")
+          ? [
+              { property: "og:image", content: image },
+              { name: "twitter:image", content: image },
+            ]
+          : []),
+      ],
+    };
+  },
+  component: ProductPage,
+});
+
+function ProductPage() {
+  const { product, images, variants, specs, category, related } = Route.useLoaderData();
+  const { settings } = useStoreConfig();
+  const cart = useCart();
+  const [variantId, setVariantId] = useState<string | null>(variants[0]?.id ?? null);
+  const [quantity, setQuantity] = useState(1);
+  const [activeImage, setActiveImage] = useState(product!.main_image_url ?? images[0]?.url ?? null);
+
+  const variant = variants.find((v) => v.id === variantId) ?? null;
+  const basePrice = Number(variant?.price ?? product!.price);
+  const salePrice = variant
+    ? variant.sale_price != null
+      ? Number(variant.sale_price)
+      : null
+    : product!.sale_price != null
+      ? Number(product!.sale_price)
+      : null;
+  const price = effectivePrice(basePrice, salePrice);
+  const off = discountPercent(basePrice, salePrice);
+  const stock = variant ? variant.stock_quantity : product!.stock_quantity;
+  const outOfStock = stock <= 0;
+
+  const gallery = useMemo(() => {
+    const urls = [product!.main_image_url, ...images.map((i) => i.url)].filter(
+      (u): u is string => Boolean(u),
+    );
+    return Array.from(new Set(urls));
+  }, [product, images]);
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product!.name,
+    description: product!.short_description || product!.name,
+    sku: product!.sku,
+    image: gallery,
+    offers: {
+      "@type": "Offer",
+      price: String(price),
+      priceCurrency: "UGX",
+      availability: outOfStock ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
+    },
+  };
+
+  function addToCart() {
+    cart.addLine({
+      productId: product!.id,
+      variantId: variant?.id ?? null,
+      name: product!.name,
+      variantName: variant?.name ?? null,
+      slug: product!.slug,
+      sku: variant?.sku || product!.sku,
+      unitPrice: price,
+      image: activeImage,
+      quantity,
+    });
+    toast.success("Added to cart", { description: `${product!.name} x${quantity}` });
+  }
+
+  return (
+    <StoreLayout>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <div className="container-page py-8">
+        <nav className="mb-6 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+          <Link to="/" className="hover:text-primary">
+            Home
+          </Link>
+          <span>/</span>
+          <Link to="/shop" className="hover:text-primary">
+            Shop
+          </Link>
+          {category && (
+            <>
+              <span>/</span>
+              <Link
+                to="/category/$slug"
+                params={{ slug: category.slug }}
+                className="hover:text-primary"
+              >
+                {category.name}
+              </Link>
+            </>
+          )}
+          <span>/</span>
+          <span className="text-foreground">{product!.name}</span>
+        </nav>
+
+        <div className="grid gap-8 lg:grid-cols-2">
+          <div>
+            <div className="card-surface aspect-square overflow-hidden bg-muted">
+              {activeImage ? (
+                <img
+                  src={activeImage}
+                  alt={product!.name}
+                  className="h-full w-full object-cover"
+                  width={1000}
+                  height={1000}
+                />
+              ) : null}
+            </div>
+            {gallery.length > 1 && (
+              <div className="mt-3 flex gap-2 overflow-x-auto">
+                {gallery.map((url) => (
+                  <button
+                    key={url}
+                    type="button"
+                    onClick={() => setActiveImage(url)}
+                    className={`h-20 w-20 shrink-0 overflow-hidden rounded-md border-2 ${activeImage === url ? "border-primary" : "border-border"}`}
+                  >
+                    <img src={url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-5">
+            <div>
+              <h1 className="font-display text-2xl font-bold md:text-3xl">{product!.name}</h1>
+              {product!.short_description && (
+                <p className="mt-2 text-sm text-muted-foreground">{product!.short_description}</p>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-baseline gap-3">
+              <span className="font-display text-3xl font-extrabold text-primary">
+                {formatUGX(price)}
+              </span>
+              {off != null && (
+                <>
+                  <span className="text-base text-muted-foreground line-through">
+                    {formatUGX(basePrice)}
+                  </span>
+                  <span className="rounded-md bg-sale px-2 py-0.5 text-xs font-semibold text-sale-foreground">
+                    Save {off}%
+                  </span>
+                </>
+              )}
+            </div>
+
+            <p className={`text-sm font-medium ${outOfStock ? "text-sale" : "text-success"}`}>
+              {outOfStock ? "Out of stock" : `In stock (${stock} available)`}
+            </p>
+
+            {variants.length > 0 && (
+              <div>
+                <p className="mb-2 text-sm font-semibold">Options</p>
+                <div className="flex flex-wrap gap-2">
+                  {variants.map((v) => (
+                    <button
+                      key={v.id}
+                      type="button"
+                      onClick={() => setVariantId(v.id)}
+                      className={`rounded-md border px-3 py-2 text-sm transition-colors ${
+                        variantId === v.id
+                          ? "border-primary bg-accent font-semibold text-primary"
+                          : "border-border hover:bg-accent"
+                      }`}
+                    >
+                      {v.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center rounded-md border border-border">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Decrease quantity"
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <span className="w-10 text-center text-sm font-semibold">{quantity}</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Increase quantity"
+                  onClick={() => setQuantity((q) => q + 1)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              <Button size="lg" disabled={outOfStock} onClick={addToCart}>
+                Add to cart
+              </Button>
+              {settings["whatsapp"] && (
+                <Button asChild size="lg" variant="secondary">
+                  <a
+                    href={whatsappLink(
+                      settings["whatsapp"],
+                      productEnquiryMessage({
+                        productName: product!.name,
+                        url: `https://www.ugalights.com/product/${product!.slug}`,
+                        variant: variant?.name ?? null,
+                        quantity,
+                      }),
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <MessageCircle className="mr-1 h-4 w-4" /> Order on WhatsApp
+                  </a>
+                </Button>
+              )}
+            </div>
+
+            <div className="grid gap-2 rounded-lg bg-muted p-4 text-sm">
+              <p className="flex items-center gap-2">
+                <Truck className="h-4 w-4 text-primary" /> Delivery in Kampala &amp; countrywide
+              </p>
+              <p className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-primary" /> Genuine, quality-checked products
+              </p>
+            </div>
+
+            {specs.length > 0 && (
+              <div>
+                <h2 className="mb-2 font-display text-lg font-bold">Specifications</h2>
+                <dl className="divide-y divide-border rounded-lg border border-border text-sm">
+                  {specs.map((spec) => (
+                    <div key={spec.label} className="flex justify-between gap-4 px-4 py-2">
+                      <dt className="text-muted-foreground">{spec.label}</dt>
+                      <dd className="font-medium">{spec.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {product!.description && (
+          <section className="mt-12 max-w-3xl">
+            <h2 className="section-title mb-3">Description</h2>
+            <div className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+              {product!.description}
+            </div>
+          </section>
+        )}
+
+        {related.length > 0 && (
+          <section className="mt-14">
+            <h2 className="section-title mb-6">Related products</h2>
+            <ProductGrid products={related} />
+          </section>
+        )}
+      </div>
+    </StoreLayout>
+  );
+}

@@ -1,0 +1,58 @@
+REVOKE ALL ON FUNCTION public.has_role(uuid, public.app_role) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.is_staff(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.has_role(uuid, public.app_role) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.is_staff(uuid) TO authenticated, service_role;
+
+INSERT INTO public.products (name, slug, sku, short_description, description, price, sale_price, cost_price, stock_quantity, category_id, brand_id, tags, is_featured, is_bestseller, is_new_arrival, seo_title, seo_description) VALUES
+('9W LED Bulb (E27)','9w-led-bulb','UGL-BLB-9W','Bright 9W E27 LED bulb, cool daylight.','A reliable 9W E27 LED bulb producing around 810 lumens while using a fraction of the power of an incandescent bulb. Ideal for bedrooms, corridors and shops.',12000,9500,7000,240,(SELECT id FROM public.categories WHERE slug='led-bulbs'),(SELECT id FROM public.brands WHERE slug='ugalights'),'{led,bulb,e27}',true,true,false,'9W LED Bulb E27 in Uganda | UGALights','Buy a 9W E27 LED bulb in Uganda from UGALights. Energy saving, bright daylight output, delivered countrywide.'),
+('12W LED Bulb (E27)','12w-led-bulb','UGL-BLB-12W','12W E27 LED bulb for living rooms and offices.','A 12W E27 LED bulb giving roughly 1100 lumens of clean light. Great for sitting rooms, offices and workshops.',15000,NULL,9000,180,(SELECT id FROM public.categories WHERE slug='led-bulbs'),(SELECT id FROM public.brands WHERE slug='ugalights'),'{led,bulb}',true,true,false,'12W LED Bulb E27 in Uganda | UGALights','Buy a 12W E27 LED bulb in Uganda. Bright, energy efficient lighting from UGALights.'),
+('15W LED Bulb (E27)','15w-led-bulb','UGL-BLB-15W','High output 15W E27 LED bulb.','A 15W E27 LED bulb for larger rooms, halls and outdoor security fittings where you need more light.',19000,16500,11000,120,(SELECT id FROM public.categories WHERE slug='led-bulbs'),(SELECT id FROM public.brands WHERE slug='ugalights'),'{led,bulb}',false,true,false,'15W LED Bulb E27 in Uganda | UGALights','Buy a 15W E27 LED bulb from UGALights Uganda. High brightness, low power use.'),
+('18W Round LED Panel Light','led-panel-light','UGL-PNL-18W','Slim recessed 18W LED ceiling panel.','A slim 18W recessed LED panel light with even, glare-free output. Popular in salons, clinics, offices and modern homes.',45000,38000,27000,90,(SELECT id FROM public.categories WHERE slug='led-panels'),(SELECT id FROM public.brands WHERE slug='ugalights'),'{panel,ceiling,office}',true,true,true,'18W LED Panel Light Uganda | UGALights','Slim 18W recessed LED panel lights for offices and homes in Uganda. Buy online from UGALights.'),
+('100W LED Flood Light','led-flood-light','UGL-FLD-100W','Waterproof 100W outdoor LED flood light.','IP66 rated 100W LED flood light for compounds, car parks, sites and signage. Tough aluminium housing with tempered glass.',150000,129000,95000,45,(SELECT id FROM public.categories WHERE slug='flood-lights'),(SELECT id FROM public.brands WHERE slug='generic'),'{flood,outdoor,ip66}',true,true,false,'100W LED Flood Light Uganda | UGALights','Buy waterproof 100W LED flood lights in Uganda from UGALights. Ideal for compounds and sites.'),
+('Solar Security Light 60W','solar-security-light','UGL-SOL-60W','All-in-one solar security light with motion sensor.','A 60W all-in-one solar security light with integrated panel, lithium battery and PIR motion sensor. No wiring and no electricity bill.',260000,229000,170000,30,(SELECT id FROM public.categories WHERE slug='solar-lights'),(SELECT id FROM public.brands WHERE slug='generic'),'{solar,security,motion}',true,true,true,'Solar Security Light 60W Uganda | UGALights','All-in-one 60W solar security light with motion sensor. Buy in Uganda from UGALights.'),
+('Outdoor Wall Light (Up & Down)','outdoor-wall-light','UGL-WAL-12W','Modern up and down outdoor wall light.','A weatherproof up-and-down LED wall light that gives entrances, gates and verandas a clean modern look.',85000,NULL,52000,60,(SELECT id FROM public.categories WHERE slug='wall-lights'),(SELECT id FROM public.brands WHERE slug='ugalights'),'{wall,outdoor,modern}',false,false,true,'Outdoor Wall Light Uganda | UGALights','Modern up and down outdoor LED wall lights for homes in Uganda.'),
+('Modern Ceiling Light 24W','ceiling-light-24w','UGL-CEL-24W','Surface mounted 24W LED ceiling light.','A surface mounted 24W LED ceiling light with adjustable colour temperature. Suits bedrooms, corridors and sitting rooms.',95000,79000,58000,70,(SELECT id FROM public.categories WHERE slug='ceiling-lights'),(SELECT id FROM public.brands WHERE slug='ugalights'),'{ceiling,indoor}',true,false,false,'Modern 24W LED Ceiling Light Uganda | UGALights','Buy surface mounted 24W LED ceiling lights in Uganda from UGALights.'),
+('LED Strip Light 5m (Warm White)','led-strip-light-5m','UGL-STR-5M','5 metre flexible LED strip with adapter.','A 5 metre flexible LED strip light with adhesive backing and power adapter. Perfect for ceiling coves, counters and display shelves.',55000,45000,32000,110,(SELECT id FROM public.categories WHERE slug='led-strip-lights'),(SELECT id FROM public.brands WHERE slug='generic'),'{strip,decor}',false,true,true,'5m LED Strip Light Uganda | UGALights','Flexible 5 metre LED strip lights with adapter, available in Uganda from UGALights.'),
+('Crystal Pendant Decorative Light','decorative-pendant-light','UGL-DEC-PND','Elegant crystal pendant light.','An elegant crystal pendant light that turns a dining area or stairwell into a feature. Includes mounting kit.',420000,369000,250000,15,(SELECT id FROM public.categories WHERE slug='decorative-lights'),(SELECT id FROM public.brands WHERE slug='ugalights'),'{decor,pendant,crystal}',true,false,true,'Crystal Pendant Decorative Light Uganda | UGALights','Elegant crystal pendant lights for dining rooms and stairwells in Uganda.'),
+('30W LED Security Light with Sensor','security-light-30w','UGL-SEC-30W','Motion sensor 30W LED security light.','A 30W LED security light with built-in PIR motion sensor for gates, backyards and corridors.',110000,95000,66000,55,(SELECT id FROM public.categories WHERE slug='security-lights'),(SELECT id FROM public.brands WHERE slug='generic'),'{security,sensor}',false,true,false,'30W LED Security Light with Sensor Uganda | UGALights','Buy 30W motion sensor LED security lights in Uganda from UGALights.'),
+('4-Way Extension Cable (3m)','extension-cable-3m','UGL-EXT-3M','Surge protected 4-way extension cable.','A 3 metre 4-way extension cable with surge protection and individual switches. Copper conductors for safe, reliable use.',48000,42000,28000,140,(SELECT id FROM public.categories WHERE slug='extension-cables'),(SELECT id FROM public.brands WHERE slug='generic'),'{extension,socket}',false,true,false,'4-Way Extension Cable Uganda | UGALights','Surge protected 4-way extension cables with copper conductors, available in Uganda.'),
+('2-Gang Wall Switch (White)','wall-switch-2gang','UGL-SWT-2G','Durable 2-gang wall switch.','A 2-gang 16A wall switch with a clean white finish and solid click action. Fits standard back boxes.',18000,NULL,10000,200,(SELECT id FROM public.categories WHERE slug='switches-sockets'),(SELECT id FROM public.brands WHERE slug='generic'),'{switch,electrical}',false,false,false,'2-Gang Wall Switch Uganda | UGALights','Buy durable 2-gang 16A wall switches in Uganda from UGALights.'),
+('13A Double Wall Socket','wall-socket-13a','UGL-SKT-13A','13A double wall socket with shutters.','A 13A double wall socket with safety shutters and screw terminals. Suitable for homes, offices and shops.',28000,24000,15000,160,(SELECT id FROM public.categories WHERE slug='switches-sockets'),(SELECT id FROM public.brands WHERE slug='generic'),'{socket,electrical}',false,false,false,'13A Double Wall Socket Uganda | UGALights','Buy 13A double wall sockets with safety shutters in Uganda from UGALights.');
+
+INSERT INTO public.product_variants (product_id, name, sku, price, sale_price, stock_quantity, attributes, sort_order) VALUES
+((SELECT id FROM public.products WHERE slug='9w-led-bulb'),'9W Cool White','UGL-BLB-9W-CW',12000,9500,120,'{"Wattage":"9W","Colour":"Cool White"}'::jsonb,1),
+((SELECT id FROM public.products WHERE slug='9w-led-bulb'),'9W Warm White','UGL-BLB-9W-WW',12000,9500,120,'{"Wattage":"9W","Colour":"Warm White"}'::jsonb,2),
+((SELECT id FROM public.products WHERE slug='12w-led-bulb'),'12W Cool White','UGL-BLB-12W-CW',15000,NULL,90,'{"Wattage":"12W","Colour":"Cool White"}'::jsonb,1),
+((SELECT id FROM public.products WHERE slug='12w-led-bulb'),'12W Warm White','UGL-BLB-12W-WW',15000,NULL,90,'{"Wattage":"12W","Colour":"Warm White"}'::jsonb,2),
+((SELECT id FROM public.products WHERE slug='led-panel-light'),'18W Round','UGL-PNL-18R',45000,38000,50,'{"Wattage":"18W","Finish":"Round"}'::jsonb,1),
+((SELECT id FROM public.products WHERE slug='led-panel-light'),'24W Round','UGL-PNL-24R',58000,49000,40,'{"Wattage":"24W","Finish":"Round"}'::jsonb,2),
+((SELECT id FROM public.products WHERE slug='led-flood-light'),'100W','UGL-FLD-100',150000,129000,25,'{"Wattage":"100W"}'::jsonb,1),
+((SELECT id FROM public.products WHERE slug='led-flood-light'),'200W','UGL-FLD-200',245000,219000,20,'{"Wattage":"200W"}'::jsonb,2),
+((SELECT id FROM public.products WHERE slug='led-strip-light-5m'),'Warm White 5m','UGL-STR-5M-WW',55000,45000,60,'{"Colour":"Warm White","Size":"5m"}'::jsonb,1),
+((SELECT id FROM public.products WHERE slug='led-strip-light-5m'),'RGB 5m','UGL-STR-5M-RGB',65000,55000,50,'{"Colour":"RGB","Size":"5m"}'::jsonb,2);
+
+INSERT INTO public.product_specifications (product_id, label, value, sort_order) VALUES
+((SELECT id FROM public.products WHERE slug='9w-led-bulb'),'Wattage','9W',1),
+((SELECT id FROM public.products WHERE slug='9w-led-bulb'),'Base','E27',2),
+((SELECT id FROM public.products WHERE slug='9w-led-bulb'),'Lumens','810 lm',3),
+((SELECT id FROM public.products WHERE slug='9w-led-bulb'),'Voltage','220-240V',4),
+((SELECT id FROM public.products WHERE slug='12w-led-bulb'),'Wattage','12W',1),
+((SELECT id FROM public.products WHERE slug='12w-led-bulb'),'Base','E27',2),
+((SELECT id FROM public.products WHERE slug='12w-led-bulb'),'Lumens','1100 lm',3),
+((SELECT id FROM public.products WHERE slug='led-panel-light'),'Wattage','18W',1),
+((SELECT id FROM public.products WHERE slug='led-panel-light'),'Cut-out size','205mm',2),
+((SELECT id FROM public.products WHERE slug='led-panel-light'),'Colour Temperature','6500K',3),
+((SELECT id FROM public.products WHERE slug='led-flood-light'),'Wattage','100W',1),
+((SELECT id FROM public.products WHERE slug='led-flood-light'),'Ingress Protection','IP66',2),
+((SELECT id FROM public.products WHERE slug='led-flood-light'),'Voltage','220-240V',3),
+((SELECT id FROM public.products WHERE slug='solar-security-light'),'Panel','Monocrystalline',1),
+((SELECT id FROM public.products WHERE slug='solar-security-light'),'Battery','Lithium LiFePO4',2),
+((SELECT id FROM public.products WHERE slug='solar-security-light'),'Sensor','PIR motion',3),
+((SELECT id FROM public.products WHERE slug='extension-cable-3m'),'Length','3 metres',1),
+((SELECT id FROM public.products WHERE slug='extension-cable-3m'),'Sockets','4-way',2),
+((SELECT id FROM public.products WHERE slug='wall-socket-13a'),'Rating','13A',1),
+((SELECT id FROM public.products WHERE slug='wall-socket-13a'),'Gangs','2',2);
+
+UPDATE public.products SET sales_count = 120 WHERE slug IN ('9w-led-bulb','12w-led-bulb');
+UPDATE public.products SET sales_count = 90 WHERE slug IN ('led-panel-light','led-flood-light');
+UPDATE public.products SET sales_count = 60 WHERE slug IN ('solar-security-light','led-strip-light-5m','extension-cable-3m','security-light-30w','15w-led-bulb');
