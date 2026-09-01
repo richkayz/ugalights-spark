@@ -323,7 +323,10 @@ function SectionCard({
         {meta.fields.map((field) =>
           field.type === "items" ? (
             <label key={field.key} className="grid gap-1 text-sm md:col-span-2">
-              <span className="font-medium">{field.label} (one entry per line: title | text)</span>
+              <span className="font-medium">
+                {field.label} (one entry per line:{" "}
+                {section.section_key === "faq" ? "question | answer" : "title | text"})
+              </span>
               <Textarea
                 rows={4}
                 value={itemsToText(content[field.key], section.section_key)}
@@ -365,14 +368,10 @@ function SectionCard({
   );
 }
 
-function itemsToText(value: unknown, sectionKey: string): string {
+function itemsToText(value: unknown, _sectionKey: string): string {
   if (!Array.isArray(value)) return "";
   return (value as Record<string, string>[])
-    .map((item) =>
-      sectionKey === "testimonials"
-        ? [item["name"] ?? "", item["location"] ?? "", item["text"] ?? ""].join(" | ")
-        : [item["title"] ?? "", item["text"] ?? ""].join(" | "),
-    )
+    .map((item) => [item["title"] ?? "", item["text"] ?? ""].join(" | "))
     .join("\n");
 }
 
@@ -385,13 +384,8 @@ function textToItems(
   let error: string | null = null;
   for (const line of lines) {
     const parts = line.split("|").map((p) => p.trim());
-    if (sectionKey === "testimonials") {
-      if (parts.length < 3) error = "Use: name | location | quote";
-      items.push({ name: parts[0] ?? "", location: parts[1] ?? "", text: parts[2] ?? "" });
-    } else {
-      if (parts.length < 2) error = "Use: title | text";
-      items.push({ title: parts[0] ?? "", text: parts[1] ?? "" });
-    }
+    if (parts.length < 2) error = sectionKey === "faq" ? "Use: question | answer" : "Use: title | text";
+    items.push({ title: parts[0] ?? "", text: parts.slice(1).join(" | ") });
   }
   return { items, error };
 }
