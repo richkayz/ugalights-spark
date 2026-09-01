@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
+import { Facebook, Instagram, Mail, MapPin, MessageCircle } from "lucide-react";
+
 import { BrandLogo } from "@/components/BrandLogo";
 import { useStoreConfig } from "@/hooks/use-store-config";
 
