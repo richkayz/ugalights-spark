@@ -556,6 +556,7 @@ export type Database = {
       products: {
         Row: {
           brand_id: string | null
+          bulk_tiers: Json
           category_id: string | null
           cost_price: number | null
           created_at: string
@@ -570,6 +571,7 @@ export type Database = {
           main_image_url: string | null
           name: string
           price: number
+          pricing_mode: string
           sale_price: number | null
           sales_count: number
           seo_description: string | null
@@ -586,6 +588,7 @@ export type Database = {
         }
         Insert: {
           brand_id?: string | null
+          bulk_tiers?: Json
           category_id?: string | null
           cost_price?: number | null
           created_at?: string
@@ -600,6 +603,7 @@ export type Database = {
           main_image_url?: string | null
           name: string
           price?: number
+          pricing_mode?: string
           sale_price?: number | null
           sales_count?: number
           seo_description?: string | null
@@ -616,6 +620,7 @@ export type Database = {
         }
         Update: {
           brand_id?: string | null
+          bulk_tiers?: Json
           category_id?: string | null
           cost_price?: number | null
           created_at?: string
@@ -630,6 +635,7 @@ export type Database = {
           main_image_url?: string | null
           name?: string
           price?: number
+          pricing_mode?: string
           sale_price?: number | null
           sales_count?: number
           seo_description?: string | null
@@ -724,6 +730,94 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quote_requests: {
+        Row: {
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string
+          id: string
+          kind: string
+          location: string
+          message: string
+          order_id: string | null
+          product_id: string | null
+          product_name: string
+          quantity: number
+          quoted_price: number | null
+          reference: string
+          staff_notes: string
+          status: string
+          updated_at: string
+          variant_id: string | null
+          variant_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_email?: string | null
+          customer_name: string
+          customer_phone: string
+          id?: string
+          kind?: string
+          location?: string
+          message?: string
+          order_id?: string | null
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          quoted_price?: number | null
+          reference?: string
+          staff_notes?: string
+          status?: string
+          updated_at?: string
+          variant_id?: string | null
+          variant_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string
+          id?: string
+          kind?: string
+          location?: string
+          message?: string
+          order_id?: string | null
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          quoted_price?: number | null
+          reference?: string
+          staff_notes?: string
+          status?: string
+          updated_at?: string
+          variant_id?: string | null
+          variant_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_requests_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_requests_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
             referencedColumns: ["id"]
           },
         ]

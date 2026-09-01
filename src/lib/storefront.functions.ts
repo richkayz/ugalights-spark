@@ -9,7 +9,7 @@ import type {
 } from "./store-types";
 
 const PRODUCT_CARD_COLUMNS =
-  "id,name,slug,price,sale_price,main_image_url,stock_quantity,stock_status,is_new_arrival,is_bestseller,short_description";
+  "id,name,slug,price,sale_price,main_image_url,stock_quantity,stock_status,is_new_arrival,is_bestseller,short_description,pricing_mode,bulk_tiers";
 
 function toSettings(rows: { key: string; value: string }[] | null): SettingsMap {
   const map: SettingsMap = {};
@@ -267,4 +267,43 @@ export const validateCoupon = createServerFn({ method: "POST" })
         : Math.min(Number(coupon.discount_value), data.subtotal);
 
     return { valid: true as const, code: coupon.code, discount, message: "Coupon applied." };
+  });
+
+/** Public quote / bulk-price request submitted from a product page. */
+export const submitQuoteRequest = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        productId: z.string().uuid().nullable().optional(),
+        productName: z.string().trim().max(200).default(""),
+        variantId: z.string().uuid().nullable().optional(),
+        variantName: z.string().trim().max(160).nullable().optional(),
+        quantity: z.number().int().min(1).max(100000).default(1),
+        customerName: z.string().trim().min(2).max(120),
+        customerPhone: z.string().trim().min(5).max(40),
+        customerEmail: z.string().trim().max(150).optional().default(""),
+        location: z.string().trim().max(160).default(""),
+        message: z.string().trim().max(1500).default(""),
+        kind: z.enum(["quote", "bulk"]).default("quote"),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { publicClient } = await import("./supabase.server");
+    const db = publicClient();
+    const { error } = await db.from("quote_requests").insert({
+      product_id: data.productId ?? null,
+      product_name: data.productName,
+      variant_id: data.variantId ?? null,
+      variant_name: data.variantName ?? null,
+      quantity: data.quantity,
+      customer_name: data.customerName,
+      customer_phone: data.customerPhone,
+      customer_email: data.customerEmail || null,
+      location: data.location,
+      message: data.message,
+      kind: data.kind,
+    });
+    if (error) return { ok: false as const, message: "Could not send your request. Please try WhatsApp." };
+    return { ok: true as const };
   });

@@ -377,6 +377,18 @@ const productSchema = z.object({
   price: z.number().min(0),
   salePrice: z.number().min(0).nullable().optional(),
   costPrice: z.number().min(0).nullable().optional(),
+  pricingMode: z.enum(["show_price", "quote_only", "show_price_bulk"]).default("show_price"),
+  bulkTiers: z
+    .array(
+      z.object({
+        minQty: z.number().int().min(1).max(1000000),
+        maxQty: z.number().int().min(1).max(1000000).nullable(),
+        price: z.number().min(0).nullable(),
+        note: z.string().max(160).default(""),
+      }),
+    )
+    .max(10)
+    .default([]),
   stockQuantity: z.number().int().min(0).default(0),
   lowStockThreshold: z.number().int().min(0).default(5),
   categoryId: z.string().uuid().nullable().optional(),
@@ -456,6 +468,8 @@ export const saveProduct = createServerFn({ method: "POST" })
       price: data.price,
       sale_price: data.salePrice ?? null,
       cost_price: data.costPrice ?? null,
+      pricing_mode: data.pricingMode,
+      bulk_tiers: data.bulkTiers,
       stock_quantity: data.stockQuantity,
       low_stock_threshold: data.lowStockThreshold,
       stock_status: data.stockQuantity > 0 ? "in_stock" : "out_of_stock",
@@ -930,4 +944,215 @@ export const adjustInventory = createServerFn({ method: "POST" })
       created_by: (context as any).userId,
     });
     return { ok: true as const, resulting };
+  });
+
+/* ---------------------------------------------------------------------------
+ * Quote requests (quote-only + bulk price enquiries)
+ * ------------------------------------------------------------------------- */
+
+const QUOTE_STATUSES = ["new", "contacted", "quoted", "accepted", "rejected", "closed"] as const;
+
+export const listQuoteRequests = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        status: z.enum(QUOTE_STATUSES).optional(),
+        q: z.string().max(120).optional(),
+      })
+      .default({})
+      .parse(input ?? {}),
+  )
+  .handler(async ({ context, data }) => {
+    await assertStaff(context as any);
+    const db = (context as any).supabase;
+    let query = db
+      .from("quote_requests")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(300);
+    if (data.status) query = query.eq("status", data.status);
+    if (data.q)
+      query = query.or(
+        `customer_name.ilike.%${data.q}%,customer_phone.ilike.%${data.q}%,product_name.ilike.%${data.q}%,reference.ilike.%${data.q}%`,
+      );
+    const [{ data: rows }, { data: all }] = await Promise.all([
+      query,
+      db.from("quote_requests").select("status"),
+    ]);
+    const counts: Record<string, number> = {};
+    for (const row of (all ?? []) as { status: string }[]) {
+      counts[row.status] = (counts[row.status] ?? 0) + 1;
+    }
+    return { requests: rows ?? [], counts, total: (all ?? []).length };
+  });
+
+export const updateQuoteRequest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        status: z.enum(QUOTE_STATUSES).optional(),
+        quotedPrice: z.number().min(0).nullable().optional(),
+        staffNotes: z.string().max(2000).optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    await assertStaff(context as any);
+    const db = (context as any).supabase;
+    const patch: Record<string, unknown> = {};
+    if (data.status) patch["status"] = data.status;
+    if (data.quotedPrice !== undefined) patch["quoted_price"] = data.quotedPrice;
+    if (data.staffNotes !== undefined) patch["staff_notes"] = data.staffNotes;
+    const { error } = await db.from("quote_requests").update(patch).eq("id", data.id);
+    if (error) return { ok: false as const, message: error.message };
+    return { ok: true as const };
+  });
+
+export const deleteQuoteRequest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertStaff(context as any);
+    const db = (context as any).supabase;
+    const { error } = await db.from("quote_requests").delete().eq("id", data.id);
+    if (error) return { ok: false as const, message: error.message };
+    return { ok: true as const };
+  });
+
+/** Turns an accepted quote request into a real order (stock + customer included). */
+export const convertQuoteToOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        unitPrice: z.number().min(0),
+        deliveryFee: z.number().min(0).default(0),
+        paymentMethod: z
+          .enum(["cod", "mobile_money", "bank_transfer", "cash", "whatsapp"])
+          .default("cod"),
+      })
+      .parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    await assertStaff(context as any);
+    const db = (context as any).supabase;
+
+    const { data: quote } = await db
+      .from("quote_requests")
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (!quote) return { ok: false as const, message: "Quote request not found" };
+    if (quote.order_id) return { ok: false as const, message: "This quote is already an order" };
+
+    let product: { id: string; name: string; sku: string; stock_quantity: number } | null = null;
+    if (quote.product_id) {
+      const { data: row } = await db
+        .from("products")
+        .select("id,name,sku,stock_quantity")
+        .eq("id", quote.product_id)
+        .maybeSingle();
+      product = row ?? null;
+    }
+
+    const quantity = Number(quote.quantity) || 1;
+    const subtotal = data.unitPrice * quantity;
+    const total = Math.max(0, subtotal + data.deliveryFee);
+
+    const { data: existing } = await db
+      .from("customers")
+      .select("id,orders_count,total_spent")
+      .eq("phone", quote.customer_phone)
+      .maybeSingle();
+    let customerId = existing?.id as string | undefined;
+    if (!customerId) {
+      const { data: created } = await db
+        .from("customers")
+        .insert({
+          full_name: quote.customer_name,
+          phone: quote.customer_phone,
+          email: quote.customer_email || null,
+        })
+        .select("id")
+        .maybeSingle();
+      customerId = created?.id as string | undefined;
+    }
+
+    const { data: order, error } = await db
+      .from("orders")
+      .insert({
+        order_number: adminOrderNumber(),
+        customer_id: customerId ?? null,
+        customer_name: quote.customer_name,
+        customer_phone: quote.customer_phone,
+        customer_email: quote.customer_email || null,
+        delivery_location: quote.location || "Kampala",
+        delivery_address: "",
+        notes: `From quote ${quote.reference}. ${quote.message ?? ""}`.trim(),
+        payment_method: data.paymentMethod,
+        payment_status: "pending",
+        status: "confirmed",
+        subtotal,
+        delivery_fee: data.deliveryFee,
+        discount: 0,
+        total,
+      })
+      .select("id,order_number")
+      .maybeSingle();
+    if (error || !order) {
+      return { ok: false as const, message: error?.message ?? "Could not create order" };
+    }
+
+    await db.from("order_items").insert({
+      order_id: order.id,
+      product_id: product?.id ?? null,
+      variant_id: quote.variant_id ?? null,
+      product_name: quote.product_name || product?.name || "Quoted item",
+      variant_name: quote.variant_name ?? null,
+      sku: product?.sku ?? "",
+      unit_price: data.unitPrice,
+      quantity,
+      line_total: subtotal,
+    });
+
+    if (product) {
+      const resulting = Math.max(0, Number(product.stock_quantity) - quantity);
+      await db
+        .from("products")
+        .update({
+          stock_quantity: resulting,
+          stock_status: resulting > 0 ? "in_stock" : "out_of_stock",
+        })
+        .eq("id", product.id);
+      await db.from("inventory_movements").insert({
+        product_id: product.id,
+        quantity_change: -quantity,
+        resulting_stock: resulting,
+        reason: "sale",
+        reference: order.order_number,
+        created_by: (context as any).userId,
+      });
+    }
+
+    if (customerId) {
+      await db
+        .from("customers")
+        .update({
+          orders_count: (existing?.orders_count ?? 0) + 1,
+          total_spent: Number(existing?.total_spent ?? 0) + total,
+          last_order_at: new Date().toISOString(),
+        })
+        .eq("id", customerId);
+    }
+
+    await db
+      .from("quote_requests")
+      .update({ status: "accepted", order_id: order.id, quoted_price: data.unitPrice })
+      .eq("id", data.id);
+
+    return { ok: true as const, id: order.id as string, orderNumber: order.order_number as string };
   });

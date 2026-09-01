@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ProductForm, type ProductFormValues } from "@/components/admin/ProductForm";
 import { Button } from "@/components/ui/button";
+import { parseBulkTiers, pricingMode } from "@/lib/pricing";
 import { deleteProduct, getAdminProduct, getCatalogueOptions, saveProduct } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/products/$id")({
@@ -68,6 +69,8 @@ function EditProduct() {
         price: Number(product.price),
         salePrice: product.sale_price == null ? null : Number(product.sale_price),
         costPrice: product.cost_price == null ? null : Number(product.cost_price),
+        pricingMode: pricingMode(product.pricing_mode),
+        bulkTiers: parseBulkTiers(product.bulk_tiers),
         stockQuantity: Number(product.stock_quantity),
         lowStockThreshold: Number(product.low_stock_threshold),
         categoryId: product.category_id ?? null,
