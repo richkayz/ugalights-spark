@@ -3,6 +3,7 @@ import { StoreLayout } from "@/components/storefront/StoreLayout";
 import { ProductListing, type ListingSearch } from "@/components/storefront/ProductListing";
 import { getShopProducts } from "@/lib/storefront.functions";
 import type { SortValue } from "@/components/storefront/ProductFilters";
+import { breadcrumbJsonLd, canonicalLink, canonicalMeta, clamp, socialImage } from "@/lib/seo";
 
 const SORTS: SortValue[] = ["featured", "newest", "price_asc", "price_desc", "bestselling"];
 
@@ -27,16 +28,23 @@ export const Route = createFileRoute("/category/$slug")({
     }),
   head: ({ loaderData }) => {
     const name = loaderData?.category?.name ?? "Category";
-    const description =
-      loaderData?.category?.description ||
-      `Shop ${name} from UGALights with fast delivery across Uganda.`;
+    const description = clamp(
+      loaderData?.category?.description,
+      `Shop ${name} in Uganda at UGALights. Genuine products, UGX prices and delivery in Kampala and countrywide.`,
+    );
+    const path = `/category/${loaderData?.category?.slug ?? ""}`;
     return {
       meta: [
-        { title: `${name} | UGALights Uganda` },
-        { name: "description", content: description.slice(0, 155) },
-        { property: "og:title", content: `${name} | UGALights` },
-        { property: "og:description", content: description.slice(0, 155) },
+        { title: `${name} in Uganda | Prices & Delivery | UGALights`.slice(0, 70) },
+        { name: "description", content: description },
+        { property: "og:title", content: `${name} | UGALights Uganda` },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary_large_image" },
+        ...socialImage(loaderData?.category?.image_url ?? null),
+        ...canonicalMeta(path),
       ],
+      links: canonicalLink(path),
     };
   },
   component: CategoryPage,
@@ -50,6 +58,18 @@ function CategoryPage() {
 
   return (
     <StoreLayout>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbJsonLd([
+              { name: "Home", path: "/" },
+              { name: "Shop", path: "/shop" },
+              { name: data.category?.name ?? slug, path: `/category/${slug}` },
+            ]),
+          ),
+        }}
+      />
       <ProductListing
         title={data.category?.name ?? "Category"}
         description={data.category?.description || undefined}

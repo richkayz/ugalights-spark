@@ -95,7 +95,6 @@ function ProductPage() {
     name: product!.name,
     description: product!.short_description || product!.name,
     sku: product!.sku,
-    ...(product!.brand_name ? { brand: { "@type": "Brand", name: product!.brand_name } } : {}),
     category: category?.name,
     url: pageUrl,
     image: gallery.map((url) => (url.startsWith("http") ? url : `${SITE_URL}${url}`)),
