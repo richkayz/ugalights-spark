@@ -3,7 +3,7 @@ import { StoreLayout } from "@/components/storefront/StoreLayout";
 import { ProductListing, type ListingSearch } from "@/components/storefront/ProductListing";
 import { getShopProducts } from "@/lib/storefront.functions";
 import type { SortValue } from "@/components/storefront/ProductFilters";
-import { breadcrumbJsonLd, canonicalLink, canonicalMeta, clamp, socialImage } from "@/lib/seo";
+import { breadcrumbJsonLd, canonicalLink, canonicalMeta, clamp } from "@/lib/seo";
 
 const SORTS: SortValue[] = ["featured", "newest", "price_asc", "price_desc", "bestselling"];
 
@@ -41,7 +41,6 @@ export const Route = createFileRoute("/category/$slug")({
         { property: "og:description", content: description },
         { property: "og:type", content: "website" },
         { name: "twitter:card", content: "summary_large_image" },
-        ...socialImage(loaderData?.category?.image_url ?? null),
         ...canonicalMeta(path),
       ],
       links: canonicalLink(path),
