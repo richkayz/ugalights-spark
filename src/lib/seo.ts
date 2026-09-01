@@ -10,15 +10,18 @@ export function absoluteUrl(path: string): string {
   return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
-/** Canonical <link> plus matching og:url meta for a route path. */
-export function canonical(path: string) {
-  const url = absoluteUrl(path);
-  return {
-    links: [{ rel: "canonical", href: url }],
-    meta: [{ property: "og:url", content: url }],
-    url,
-  };
+/** Canonical <link> for a route path. */
+export function canonicalLink(path: string) {
+  return [{ rel: "canonical", href: absoluteUrl(path) }];
 }
+
+/** og:url meta for a route path. */
+export function canonicalMeta(path: string) {
+  return [{ property: "og:url", content: absoluteUrl(path) }];
+}
+
+/** Keep utility/transactional pages out of the index but still crawlable. */
+export const NOINDEX = [{ name: "robots", content: "noindex, follow" }];
 
 /** og:image + twitter:image pair, only when we have a usable absolute image. */
 export function socialImage(image?: string | null) {
