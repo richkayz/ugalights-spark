@@ -228,3 +228,60 @@ export const setProductFlags = createServerFn({ method: "POST" })
     }
     return { ok: true as const };
   });
+
+export const listAdminCustomers = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertStaff(context as any);
+    const db = (context as any).supabase;
+    const { data } = await db
+      .from("customers")
+      .select("id,full_name,phone,email,orders_count,total_spent,last_order_at,created_at")
+      .order("total_spent", { ascending: false })
+      .limit(200);
+    return { customers: data ?? [] };
+  });
+
+export const listInventory = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertStaff(context as any);
+    const db = (context as any).supabase;
+    const [{ data: products }, { data: movements }] = await Promise.all([
+      db
+        .from("products")
+        .select("id,name,sku,stock_quantity,low_stock_threshold,stock_status")
+        .order("stock_quantity", { ascending: true })
+        .limit(200),
+      db
+        .from("inventory_movements")
+        .select("id,product_id,quantity_change,resulting_stock,reason,reference,created_at")
+        .order("created_at", { ascending: false })
+        .limit(50),
+    ]);
+    return { products: products ?? [], movements: movements ?? [] };
+  });
+
+export const getAdminSettings = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertStaff(context as any);
+    const db = (context as any).supabase;
+    const { data } = await db.from("settings").select("key,value").order("key");
+    return { settings: (data ?? []) as { key: string; value: string }[] };
+  });
+
+export const updateAdminSetting = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ key: z.string().max(60), value: z.string().max(2000) }).parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    await assertStaff(context as any);
+    const db = (context as any).supabase;
+    const { error } = await db
+      .from("settings")
+      .upsert({ key: data.key, value: data.value }, { onConflict: "key" });
+    if (error) return { ok: false as const, message: error.message };
+    return { ok: true as const };
+  });
