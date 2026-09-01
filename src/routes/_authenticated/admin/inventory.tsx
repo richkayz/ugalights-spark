@@ -23,9 +23,10 @@ function AdminInventory() {
     queryFn: () => fetchInventory({}),
   });
 
-  const productNames = new Map(
-    (data?.products ?? []).map((p: any) => [p.id, p.name] as [string, string]),
-  );
+  const productNames: Record<string, string> = {};
+  for (const product of (data?.products ?? []) as any[]) {
+    productNames[product.id] = product.name;
+  }
 
   return (
     <AdminLayout title="Inventory">
