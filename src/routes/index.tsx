@@ -1,12 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
+  Banknote,
   Clock,
+  HelpCircle,
   Mail,
   MapPin,
   MessageCircle,
+  PackageCheck,
   Phone,
   ShieldCheck,
+  Smartphone,
   Truck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
