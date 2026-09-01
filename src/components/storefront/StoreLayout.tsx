@@ -1,6 +1,7 @@
 import { MessageCircle } from "lucide-react";
 import { AnnouncementBar, SiteHeader } from "./SiteHeader";
 import { SiteFooter } from "./SiteFooter";
+import { MobileTabBar } from "./MobileTabBar";
 import { useStoreConfig } from "@/hooks/use-store-config";
 import { whatsappLink } from "@/lib/whatsapp";
 
