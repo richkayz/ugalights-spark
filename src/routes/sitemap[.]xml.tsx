@@ -18,6 +18,10 @@ function xmlEscape(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+function lastmodOf(row: { updated_at?: string | null }): { lastmod?: string } {
+  return row.updated_at ? { lastmod: row.updated_at } : {};
+}
+
 function urlTag(entry: Entry): string {
   return [
     "  <url>",
@@ -46,7 +50,7 @@ export const Route = createFileRoute("/sitemap.xml")({
             supabase
               .from("products")
               .select("slug, updated_at")
-              .eq("status", "published")
+              .eq("is_published", true)
               .order("updated_at", { ascending: false })
               .limit(2000),
           ]);
@@ -56,7 +60,7 @@ export const Route = createFileRoute("/sitemap.xml")({
               loc: `/category/${category.slug}`,
               changefreq: "weekly",
               priority: "0.8",
-              lastmod: (category as { updated_at?: string }).updated_at,
+              ...lastmodOf(category),
             });
           }
           for (const product of products.data ?? []) {
@@ -64,7 +68,7 @@ export const Route = createFileRoute("/sitemap.xml")({
               loc: `/product/${product.slug}`,
               changefreq: "weekly",
               priority: "0.7",
-              lastmod: (product as { updated_at?: string }).updated_at,
+              ...lastmodOf(product),
             });
           }
         } catch (error) {
