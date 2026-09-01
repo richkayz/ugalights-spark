@@ -220,79 +220,156 @@ function HomePage() {
           </section>
         );
 
-      case "testimonials": {
+      case "about_us":
+        return (
+          <section key={section.id} className="border-y border-border bg-card">
+            <div className="container-page grid gap-4 py-12 lg:w-3/4">
+              <h2 className="section-title">{section.title}</h2>
+              {section.subtitle && (
+                <p className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
+                  {section.subtitle}
+                </p>
+              )}
+              {str(section, "body") && (
+                <p className="text-sm leading-relaxed text-muted-foreground md:text-base">
+                  {str(section, "body")}
+                </p>
+              )}
+              {str(section, "button_text") && (
+                <Button asChild variant="secondary" className="w-fit">
+                  <Link to={(str(section, "button_link") ?? "/about") as string}>
+                    {str(section, "button_text")}
+                  </Link>
+                </Button>
+              )}
+            </div>
+          </section>
+        );
+
+      case "delivery_info": {
         const list = items(section);
         if (list.length === 0) return null;
         return (
-          <section key={section.id} className="bg-card py-12">
-            <div className="container-page">
-              <h2 className="section-title mb-6">{section.title}</h2>
-              <div className="grid gap-4 md:grid-cols-3">
-                {list.map((item, index) => (
-                  <figure key={index} className="card-surface space-y-3 p-5">
-                    <Quote className="h-5 w-5 text-primary" />
-                    <blockquote className="text-sm text-muted-foreground">{item["text"]}</blockquote>
-                    <figcaption className="text-sm font-semibold">
-                      {item["name"]}
-                      {item["location"] ? (
-                        <span className="text-muted-foreground"> — {item["location"]}</span>
-                      ) : null}
-                    </figcaption>
-                    <div className="flex gap-0.5 text-highlight">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star key={i} className="h-3.5 w-3.5 fill-current" />
-                      ))}
-                    </div>
-                  </figure>
-                ))}
-              </div>
+          <section key={section.id} className="container-page py-12">
+            <h2 className="section-title">{section.title}</h2>
+            {section.subtitle && (
+              <p className="mt-1 text-sm text-muted-foreground">{section.subtitle}</p>
+            )}
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {list.map((item, index) => (
+                <div key={index} className="card-surface flex flex-col gap-2 p-5">
+                  <span className="w-fit rounded-lg bg-accent p-2 text-primary">
+                    <Truck className="h-5 w-5" />
+                  </span>
+                  <p className="text-sm font-semibold">{item["title"]}</p>
+                  <p className="text-xs leading-relaxed text-muted-foreground">{item["text"]}</p>
+                </div>
+              ))}
             </div>
           </section>
         );
       }
 
-      case "whatsapp_cta":
-        return (
-          <section key={section.id} className="container-page py-12">
-            <div className="card-surface flex flex-col items-center gap-3 p-8 text-center">
-              <h2 className="font-display text-2xl font-bold">{section.title}</h2>
-              {section.subtitle && (
-                <p className="max-w-xl text-sm text-muted-foreground">{section.subtitle}</p>
-              )}
-              <Button asChild size="lg">
-                <a
-                  href={whatsappLink(whatsappNumber, "Hello UGALights, I need lighting advice.")}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <MessageCircle className="mr-1 h-4 w-4" />
-                  {str(section, "button_text") ?? "Chat on WhatsApp"}
-                </a>
-              </Button>
-            </div>
-          </section>
-        );
-
-      case "newsletter":
+      case "faq": {
+        const list = items(section);
+        if (list.length === 0) return null;
         return (
           <section key={section.id} className="bg-accent py-12">
-            <div className="container-page flex flex-col items-center gap-3 text-center">
-              <h2 className="font-display text-2xl font-bold">{section.title}</h2>
+            <div className="container-page">
+              <h2 className="section-title">{section.title}</h2>
               {section.subtitle && (
-                <p className="max-w-xl text-sm text-muted-foreground">{section.subtitle}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{section.subtitle}</p>
               )}
-              <Button asChild variant="secondary">
-                <a
-                  href={whatsappLink(whatsappNumber, "Please add me to UGALights offers list.")}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {str(section, "button_text") ?? "Subscribe"}
-                </a>
-              </Button>
+              <div className="mt-6 grid gap-3 lg:grid-cols-2">
+                {list.map((item, index) => (
+                  <details key={index} className="card-surface p-4">
+                    <summary className="cursor-pointer text-sm font-semibold">
+                      {item["title"]}
+                    </summary>
+                    <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                      {item["text"]}
+                    </p>
+                  </details>
+                ))}
+              </div>
+              <Link
+                to="/faq"
+                className="mt-5 inline-flex items-center text-sm font-semibold text-primary"
+              >
+                See all FAQs <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
             </div>
           </section>
         );
+      }
+
+      case "contact_info": {
+        const phone = settings["phone"] ?? "";
+        const email = settings["email"] ?? "";
+        return (
+          <section key={section.id} className="container-page py-12">
+            <div className="card-surface grid gap-6 p-6 md:grid-cols-2 md:p-8">
+              <div className="grid content-start gap-3">
+                <h2 className="section-title">{section.title}</h2>
+                {section.subtitle && (
+                  <p className="text-sm text-muted-foreground">{section.subtitle}</p>
+                )}
+                {str(section, "note") && (
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {str(section, "note")}
+                  </p>
+                )}
+                <div className="flex flex-wrap gap-3">
+                  <Button asChild>
+                    <a
+                      href={whatsappLink(whatsappNumber, "Hello UGALights, I have a question.")}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <MessageCircle className="mr-1 h-4 w-4" />
+                      {str(section, "button_text") ?? "Chat on WhatsApp"}
+                    </a>
+                  </Button>
+                  <Button asChild variant="secondary">
+                    <Link to="/contact">Contact page</Link>
+                  </Button>
+                </div>
+              </div>
+              <ul className="grid content-start gap-3 text-sm">
+                {phone && (
+                  <li className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-primary" />
+                    <a href={`tel:${phone}`} className="hover:text-primary">
+                      {phone}
+                    </a>
+                  </li>
+                )}
+                {email && (
+                  <li className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-primary" />
+                    <a href={`mailto:${email}`} className="hover:text-primary">
+                      {email}
+                    </a>
+                  </li>
+                )}
+                {str(section, "address") && (
+                  <li className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-primary" />
+                    {str(section, "address")}
+                  </li>
+                )}
+                {str(section, "hours") && (
+                  <li className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-primary" />
+                    {str(section, "hours")}
+                  </li>
+                )}
+              </ul>
+            </div>
+          </section>
+        );
+      }
+
 
       default:
         if (!section.title) return null;
