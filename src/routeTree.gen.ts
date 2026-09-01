@@ -27,6 +27,7 @@ import { Route as OrderTokenRouteImport } from './routes/order.$token'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authenticated/admin/customers'
+import { Route as AuthenticatedAdminHomepageRouteImport } from './routes/_authenticated/admin/homepage'
 import { Route as AuthenticatedAdminInventoryRouteImport } from './routes/_authenticated/admin/inventory'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin/products'
 import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin/reports'
@@ -124,6 +125,12 @@ const AuthenticatedAdminCustomersRoute =
     path: '/admin/customers',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminHomepageRoute =
+  AuthenticatedAdminHomepageRouteImport.update({
+    id: '/admin/homepage',
+    path: '/admin/homepage',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminInventoryRoute =
   AuthenticatedAdminInventoryRouteImport.update({
     id: '/admin/inventory',
@@ -178,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/order/$token': typeof OrderTokenRoute
   '/product/$slug': typeof ProductSlugRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
+  '/admin/homepage': typeof AuthenticatedAdminHomepageRoute
   '/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
@@ -203,6 +211,7 @@ export interface FileRoutesByTo {
   '/order/$token': typeof OrderTokenRoute
   '/product/$slug': typeof ProductSlugRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
+  '/admin/homepage': typeof AuthenticatedAdminHomepageRoute
   '/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
@@ -230,6 +239,7 @@ export interface FileRoutesById {
   '/order/$token': typeof OrderTokenRoute
   '/product/$slug': typeof ProductSlugRoute
   '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
+  '/_authenticated/admin/homepage': typeof AuthenticatedAdminHomepageRoute
   '/_authenticated/admin/inventory': typeof AuthenticatedAdminInventoryRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
   '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/order/$token'
     | '/product/$slug'
     | '/admin/customers'
+    | '/admin/homepage'
     | '/admin/inventory'
     | '/admin/products'
     | '/admin/reports'
@@ -282,6 +293,7 @@ export interface FileRouteTypes {
     | '/order/$token'
     | '/product/$slug'
     | '/admin/customers'
+    | '/admin/homepage'
     | '/admin/inventory'
     | '/admin/products'
     | '/admin/reports'
@@ -308,6 +320,7 @@ export interface FileRouteTypes {
     | '/order/$token'
     | '/product/$slug'
     | '/_authenticated/admin/customers'
+    | '/_authenticated/admin/homepage'
     | '/_authenticated/admin/inventory'
     | '/_authenticated/admin/products'
     | '/_authenticated/admin/reports'
@@ -464,6 +477,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCustomersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/homepage': {
+      id: '/_authenticated/admin/homepage'
+      path: '/admin/homepage'
+      fullPath: '/admin/homepage'
+      preLoaderRoute: typeof AuthenticatedAdminHomepageRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/inventory': {
       id: '/_authenticated/admin/inventory'
       path: '/admin/inventory'
@@ -511,6 +531,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
+  AuthenticatedAdminHomepageRoute: typeof AuthenticatedAdminHomepageRoute
   AuthenticatedAdminInventoryRoute: typeof AuthenticatedAdminInventoryRoute
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
   AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
@@ -522,6 +543,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,
+  AuthenticatedAdminHomepageRoute: AuthenticatedAdminHomepageRoute,
   AuthenticatedAdminInventoryRoute: AuthenticatedAdminInventoryRoute,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
   AuthenticatedAdminReportsRoute: AuthenticatedAdminReportsRoute,
