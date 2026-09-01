@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { slugify } from "@/lib/format";
+import { PRICING_MODES, tierRangeLabel } from "@/lib/pricing";
+import type { BulkTier, PricingMode } from "@/lib/store-types";
 
 export type ProductFormValues = {
   id?: string;
@@ -17,6 +19,8 @@ export type ProductFormValues = {
   price: number;
   salePrice: number | null;
   costPrice: number | null;
+  pricingMode: PricingMode;
+  bulkTiers: BulkTier[];
   stockQuantity: number;
   lowStockThreshold: number;
   categoryId: string | null;
@@ -44,6 +48,8 @@ export const emptyProduct: ProductFormValues = {
   price: 0,
   salePrice: null,
   costPrice: null,
+  pricingMode: "show_price",
+  bulkTiers: [],
   stockQuantity: 0,
   lowStockThreshold: 5,
   categoryId: null,
@@ -186,6 +192,114 @@ export function ProductForm({
             onChange={(e) => set("description", e.target.value)}
           />
         </div>
+      </section>
+
+      <section className="card-surface space-y-4 p-4">
+        <h2 className="font-display text-base font-bold">Pricing mode</h2>
+        <div className="grid gap-2 md:grid-cols-3">
+          {PRICING_MODES.map((option) => (
+            <label
+              key={option.value}
+              className={`cursor-pointer rounded-lg border p-3 text-sm transition-colors ${
+                values.pricingMode === option.value
+                  ? "border-primary bg-accent"
+                  : "border-border hover:bg-accent/50"
+              }`}
+            >
+              <span className="flex items-center gap-2 font-semibold">
+                <input
+                  type="radio"
+                  name="pricingMode"
+                  value={option.value}
+                  checked={values.pricingMode === option.value}
+                  onChange={() => set("pricingMode", option.value)}
+                />
+                {option.label}
+              </span>
+              <span className="mt-1 block text-xs text-muted-foreground">{option.help}</span>
+            </label>
+          ))}
+        </div>
+
+        {values.pricingMode !== "show_price" && (
+          <div className="space-y-2">
+            <Label>Bulk quantity tiers (optional)</Label>
+            <p className="text-xs text-muted-foreground">
+              Leave the price empty to show &quot;Contact for quotation&quot; for that tier.
+            </p>
+            {values.bulkTiers.map((tier, index) => (
+              <div key={index} className="grid gap-2 sm:grid-cols-5">
+                <Input
+                  placeholder="Min qty"
+                  inputMode="numeric"
+                  value={String(tier.minQty)}
+                  onChange={(e) => {
+                    const next = [...values.bulkTiers];
+                    next[index] = { ...tier, minQty: Math.max(1, Math.round(num(e.target.value))) };
+                    set("bulkTiers", next);
+                  }}
+                />
+                <Input
+                  placeholder="Max qty (blank = no limit)"
+                  inputMode="numeric"
+                  value={tier.maxQty == null ? "" : String(tier.maxQty)}
+                  onChange={(e) => {
+                    const next = [...values.bulkTiers];
+                    next[index] = {
+                      ...tier,
+                      maxQty: e.target.value ? Math.round(num(e.target.value)) : null,
+                    };
+                    set("bulkTiers", next);
+                  }}
+                />
+                <Input
+                  placeholder="Unit price (UGX)"
+                  inputMode="numeric"
+                  value={tier.price == null ? "" : String(tier.price)}
+                  onChange={(e) => {
+                    const next = [...values.bulkTiers];
+                    next[index] = { ...tier, price: e.target.value ? num(e.target.value) : null };
+                    set("bulkTiers", next);
+                  }}
+                />
+                <Input
+                  placeholder="Note (e.g. contact us)"
+                  value={tier.note}
+                  onChange={(e) => {
+                    const next = [...values.bulkTiers];
+                    next[index] = { ...tier, note: e.target.value };
+                    set("bulkTiers", next);
+                  }}
+                />
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">{tierRangeLabel(tier)}</span>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    aria-label="Remove tier"
+                    onClick={() => set("bulkTiers", values.bulkTiers.filter((_, i) => i !== index))}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() =>
+                set("bulkTiers", [
+                  ...values.bulkTiers,
+                  { minQty: values.bulkTiers.length === 0 ? 10 : 50, maxQty: null, price: null, note: "" },
+                ])
+              }
+            >
+              Add bulk tier
+            </Button>
+          </div>
+        )}
       </section>
 
       <section className="card-surface space-y-4 p-4">

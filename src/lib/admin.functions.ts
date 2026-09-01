@@ -377,6 +377,18 @@ const productSchema = z.object({
   price: z.number().min(0),
   salePrice: z.number().min(0).nullable().optional(),
   costPrice: z.number().min(0).nullable().optional(),
+  pricingMode: z.enum(["show_price", "quote_only", "show_price_bulk"]).default("show_price"),
+  bulkTiers: z
+    .array(
+      z.object({
+        minQty: z.number().int().min(1).max(1000000),
+        maxQty: z.number().int().min(1).max(1000000).nullable(),
+        price: z.number().min(0).nullable(),
+        note: z.string().max(160).default(""),
+      }),
+    )
+    .max(10)
+    .default([]),
   stockQuantity: z.number().int().min(0).default(0),
   lowStockThreshold: z.number().int().min(0).default(5),
   categoryId: z.string().uuid().nullable().optional(),
@@ -456,6 +468,8 @@ export const saveProduct = createServerFn({ method: "POST" })
       price: data.price,
       sale_price: data.salePrice ?? null,
       cost_price: data.costPrice ?? null,
+      pricing_mode: data.pricingMode,
+      bulk_tiers: data.bulkTiers,
       stock_quantity: data.stockQuantity,
       low_stock_threshold: data.lowStockThreshold,
       stock_status: data.stockQuantity > 0 ? "in_stock" : "out_of_stock",
