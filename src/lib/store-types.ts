@@ -15,6 +15,17 @@ export type StoreConfig = {
   footer?: HomepageSection | null;
 };
 
+export type PricingMode = "show_price" | "quote_only" | "show_price_bulk";
+
+export type BulkTier = {
+  minQty: number;
+  maxQty: number | null;
+  price: number | null;
+  note: string;
+};
+
+export type QuoteStatus = "new" | "contacted" | "quoted" | "accepted" | "rejected" | "closed";
+
 export type ProductCardData = {
   id: string;
   name: string;
@@ -27,6 +38,8 @@ export type ProductCardData = {
   is_new_arrival: boolean;
   is_bestseller: boolean;
   short_description: string;
+  pricing_mode: PricingMode;
+  bulk_tiers: BulkTier[];
 };
 
 export type CartLine = {

@@ -39,7 +39,7 @@ export const createOrder = createServerFn({ method: "POST" })
     const [{ data: products }, { data: variants }, { data: settingsRows }] = await Promise.all([
       db
         .from("products")
-        .select("id,name,sku,price,sale_price,stock_quantity,is_published")
+        .select("id,name,sku,price,sale_price,stock_quantity,is_published,pricing_mode")
         .in("id", productIds),
       variantIds.length
         ? db
@@ -70,6 +70,12 @@ export const createOrder = createServerFn({ method: "POST" })
       const product = productMap.get(item.productId);
       if (!product || !product.is_published) {
         return { ok: false as const, message: "One of the products is no longer available." };
+      }
+      if (product.pricing_mode === "quote_only") {
+        return {
+          ok: false as const,
+          message: `${product.name} is sold on quotation only. Please request a quote instead.`,
+        };
       }
       const variant = item.variantId ? variantMap.get(item.variantId) : null;
       if (item.variantId && (!variant || !variant.is_active)) {
