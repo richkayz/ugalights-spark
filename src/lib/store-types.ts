@@ -43,6 +43,7 @@ export type CartLine = {
 export type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
 
 export type HomepageSection = {
+  id: string;
   section_key: string;
   title: string;
   subtitle: string;
