@@ -356,19 +356,45 @@ export function ProductForm({
       <section className="card-surface space-y-4 p-4">
         <h2 className="font-display text-base font-bold">Images</h2>
         <div className="space-y-1.5">
-          <Label htmlFor="mainImage">Main image URL</Label>
+          <Label htmlFor="mainImage">Main image</Label>
+          <div className="flex flex-wrap items-center gap-3">
+            {values.mainImageUrl && (
+              <img
+                src={values.mainImageUrl}
+                alt="Main product image"
+                className="h-20 w-20 rounded-md border border-border object-cover"
+              />
+            )}
+            <UploadButton
+              label={values.mainImageUrl ? "Replace image" : "Upload image"}
+              onUploaded={(url) => set("mainImageUrl", url)}
+            />
+            {values.mainImageUrl && (
+              <Button type="button" variant="ghost" size="sm" onClick={() => set("mainImageUrl", null)}>
+                Remove
+              </Button>
+            )}
+          </div>
           <Input
             id="mainImage"
-            placeholder="/products/example.jpg"
+            placeholder="or paste an image URL"
             value={values.mainImageUrl ?? ""}
             onChange={(e) => set("mainImageUrl", e.target.value || null)}
           />
         </div>
         <div className="space-y-2">
+          <Label>Gallery images</Label>
           {values.images.map((img, index) => (
             <div key={index} className="flex flex-wrap items-center gap-2">
+              {img.url && (
+                <img
+                  src={img.url}
+                  alt={img.altText || "Gallery image"}
+                  className="h-14 w-14 rounded-md border border-border object-cover"
+                />
+              )}
               <Input
-                className="min-w-[220px] flex-1"
+                className="min-w-[200px] flex-1"
                 placeholder="Gallery image URL"
                 value={img.url}
                 onChange={(e) => {
@@ -378,12 +404,20 @@ export function ProductForm({
                 }}
               />
               <Input
-                className="min-w-[160px] flex-1"
+                className="min-w-[140px] flex-1"
                 placeholder="Alt text"
                 value={img.altText}
                 onChange={(e) => {
                   const next = [...values.images];
                   next[index] = { ...img, altText: e.target.value };
+                  set("images", next);
+                }}
+              />
+              <UploadButton
+                label={img.url ? "Replace" : "Upload"}
+                onUploaded={(url) => {
+                  const next = [...values.images];
+                  next[index] = { ...img, url };
                   set("images", next);
                 }}
               />
@@ -398,16 +432,23 @@ export function ProductForm({
               </Button>
             </div>
           ))}
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={() => set("images", [...values.images, { url: "", altText: "" }])}
-          >
-            Add gallery image
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => set("images", [...values.images, { url: "", altText: "" }])}
+            >
+              Add gallery image
+            </Button>
+            <UploadButton
+              label="Upload gallery image"
+              onUploaded={(url) => set("images", [...values.images, { url, altText: "" }])}
+            />
+          </div>
         </div>
       </section>
+
 
       <section className="card-surface space-y-4 p-4">
         <h2 className="font-display text-base font-bold">Specifications</h2>
