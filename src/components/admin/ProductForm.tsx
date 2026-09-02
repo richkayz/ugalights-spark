@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { UploadButton } from "@/components/admin/ImageUploadButton";
+import { ImageDropzone, UploadButton } from "@/components/admin/ImageUploadButton";
 import { slugify } from "@/lib/format";
 import { PRICING_MODES, tierRangeLabel } from "@/lib/pricing";
 import type { BulkTier, PricingMode } from "@/lib/store-types";
@@ -88,6 +88,7 @@ export function ProductForm({
   onSubmit: (values: ProductFormValues) => void;
 }) {
   const [values, setValues] = useState<ProductFormValues>(initial);
+  const [showMainUrl, setShowMainUrl] = useState(false);
   const set = <K extends keyof ProductFormValues>(key: K, value: ProductFormValues[K]) =>
     setValues((prev) => ({ ...prev, [key]: value }));
 
@@ -354,99 +355,101 @@ export function ProductForm({
         </div>
       </section>
 
-      <section className="card-surface space-y-4 p-4">
+      <section className="card-surface space-y-5 p-4">
         <h2 className="font-display text-base font-bold">Images</h2>
-        <div className="space-y-1.5">
-          <Label htmlFor="mainImage">Main image</Label>
-          <div className="flex flex-wrap items-center gap-3">
-            {values.mainImageUrl && (
+
+        <div className="space-y-2">
+          <Label>Main image</Label>
+          {values.mainImageUrl ? (
+            <div className="flex flex-wrap items-center gap-3">
               <img
                 src={values.mainImageUrl}
                 alt="Main product image"
-                className="h-20 w-20 rounded-md border border-border object-cover"
+                className="h-24 w-24 rounded-md border border-border object-cover"
               />
-            )}
-            <UploadButton
-              label={values.mainImageUrl ? "Replace image" : "Upload image"}
-              onUploaded={(url) => set("mainImageUrl", url)}
-            />
-            {values.mainImageUrl && (
+              <UploadButton label="Replace image" onUploaded={(url) => set("mainImageUrl", url)} />
               <Button type="button" variant="ghost" size="sm" onClick={() => set("mainImageUrl", null)}>
                 Remove
               </Button>
-            )}
-          </div>
-          <Input
-            id="mainImage"
-            placeholder="or paste an image URL"
-            value={values.mainImageUrl ?? ""}
-            onChange={(e) => set("mainImageUrl", e.target.value || null)}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Gallery images</Label>
-          {values.images.map((img, index) => (
-            <div key={index} className="flex flex-wrap items-center gap-2">
-              {img.url && (
-                <img
-                  src={img.url}
-                  alt={img.altText || "Gallery image"}
-                  className="h-14 w-14 rounded-md border border-border object-cover"
-                />
-              )}
-              <Input
-                className="min-w-[200px] flex-1"
-                placeholder="Gallery image URL"
-                value={img.url}
-                onChange={(e) => {
-                  const next = [...values.images];
-                  next[index] = { ...img, url: e.target.value };
-                  set("images", next);
-                }}
-              />
-              <Input
-                className="min-w-[140px] flex-1"
-                placeholder="Alt text"
-                value={img.altText}
-                onChange={(e) => {
-                  const next = [...values.images];
-                  next[index] = { ...img, altText: e.target.value };
-                  set("images", next);
-                }}
-              />
-              <UploadButton
-                label={img.url ? "Replace" : "Upload"}
-                onUploaded={(url) => {
-                  const next = [...values.images];
-                  next[index] = { ...img, url };
-                  set("images", next);
-                }}
-              />
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                onClick={() => set("images", values.images.filter((_, i) => i !== index))}
-                aria-label="Remove image"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
             </div>
-          ))}
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => set("images", [...values.images, { url: "", altText: "" }])}
-            >
-              Add gallery image
-            </Button>
-            <UploadButton
-              label="Upload gallery image"
-              onUploaded={(url) => set("images", [...values.images, { url, altText: "" }])}
+          ) : (
+            <ImageDropzone
+              multiple={false}
+              label="Drag the main photo here, or click to pick from your device"
+              onUploaded={(url) => set("mainImageUrl", url)}
             />
-          </div>
+          )}
+          <button
+            type="button"
+            className="text-xs font-medium text-primary hover:underline"
+            onClick={() => setShowMainUrl((v) => !v)}
+          >
+            {showMainUrl ? "Hide URL field" : "Paste an image URL instead"}
+          </button>
+          {showMainUrl && (
+            <Input
+              id="mainImage"
+              placeholder="https://..."
+              value={values.mainImageUrl ?? ""}
+              onChange={(e) => set("mainImageUrl", e.target.value || null)}
+            />
+          )}
+        </div>
+
+        <div className="space-y-3">
+          <Label>Gallery images</Label>
+          <ImageDropzone
+            label="Drag gallery photos here, or click to pick several from your device"
+            onUploaded={(url) => set("images", [...values.images, { url, altText: "" }])}
+          />
+
+          {values.images.length > 0 && (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {values.images.map((img, index) => (
+                <div key={index} className="flex items-center gap-3 rounded-md border border-border p-2">
+                  {img.url ? (
+                    <img
+                      src={img.url}
+                      alt={img.altText || "Gallery image"}
+                      className="h-16 w-16 shrink-0 rounded-md border border-border object-cover"
+                    />
+                  ) : (
+                    <div className="h-16 w-16 shrink-0 rounded-md bg-muted" />
+                  )}
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <Input
+                      placeholder="Alt text (helps SEO)"
+                      value={img.altText}
+                      onChange={(e) => {
+                        const next = [...values.images];
+                        next[index] = { ...img, altText: e.target.value };
+                        set("images", next);
+                      }}
+                    />
+                    <div className="flex items-center gap-2">
+                      <UploadButton
+                        label="Replace"
+                        onUploaded={(url) => {
+                          const next = [...values.images];
+                          next[index] = { ...img, url };
+                          set("images", next);
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => set("images", values.images.filter((_, i) => i !== index))}
+                        aria-label="Remove image"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
