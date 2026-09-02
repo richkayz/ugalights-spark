@@ -88,6 +88,7 @@ export function ProductForm({
   onSubmit: (values: ProductFormValues) => void;
 }) {
   const [values, setValues] = useState<ProductFormValues>(initial);
+  const [showMainUrl, setShowMainUrl] = useState(false);
   const set = <K extends keyof ProductFormValues>(key: K, value: ProductFormValues[K]) =>
     setValues((prev) => ({ ...prev, [key]: value }));
 
