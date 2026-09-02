@@ -1156,3 +1156,52 @@ export const convertQuoteToOrder = createServerFn({ method: "POST" })
 
     return { ok: true as const, id: order.id as string, orderNumber: order.order_number as string };
   });
+
+/** Uploads a product image (base64 data URL) to storage and returns its public URL. */
+export const uploadProductImage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z
+      .object({
+        filename: z.string().min(1).max(200),
+        contentType: z.string().min(3).max(100),
+        base64: z.string().min(10),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    await assertStaff(context as any);
+
+    if (!data.contentType.startsWith("image/")) {
+      return { ok: false as const, message: "Only image files can be uploaded." };
+    }
+
+    const bytes = Uint8Array.from(atob(data.base64), (c) => c.charCodeAt(0));
+    if (bytes.byteLength > 10 * 1024 * 1024) {
+      return { ok: false as const, message: "Image must be 10MB or smaller." };
+    }
+
+    const safeName = data.filename
+      .toLowerCase()
+      .replace(/[^a-z0-9.]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const path = `${new Date().toISOString().slice(0, 7)}/${crypto.randomUUID()}-${safeName}`;
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.storage
+      .from("product-images")
+      .upload(path, bytes, { contentType: data.contentType, upsert: false });
+    if (error) return { ok: false as const, message: error.message };
+
+    const url = `/api/public/media/${path}`;
+    await supabaseAdmin.from("media").insert({
+      storage_path: path,
+      url,
+      filename: safeName,
+      alt_text: "",
+      content_type: data.contentType,
+      size_bytes: bytes.byteLength,
+    });
+
+    return { ok: true as const, url };
+  });
