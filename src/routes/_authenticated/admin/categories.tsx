@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { ImageDropzone, UploadButton } from "@/components/admin/ImageUploadButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -212,12 +213,36 @@ function AdminCategories() {
             </select>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="cat-image">Image URL</Label>
-            <Input
-              id="cat-image"
-              value={draft.imageUrl}
-              onChange={(e) => setDraft({ ...draft, imageUrl: e.target.value })}
-            />
+            <Label>Category photo</Label>
+            {draft.imageUrl ? (
+              <div className="space-y-2">
+                <img
+                  src={draft.imageUrl}
+                  alt="Category"
+                  className="h-32 w-full rounded-md border border-border object-cover"
+                />
+                <div className="flex gap-2">
+                  <UploadButton
+                    label="Replace photo"
+                    onUploaded={(url) => setDraft((d) => ({ ...d, imageUrl: url }))}
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setDraft((d) => ({ ...d, imageUrl: "" }))}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <ImageDropzone
+                multiple={false}
+                label="Drag a photo here, or tap to pick from your device"
+                onUploaded={(url) => setDraft((d) => ({ ...d, imageUrl: url }))}
+              />
+            )}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="cat-desc">Description</Label>
