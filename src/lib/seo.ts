@@ -1,6 +1,6 @@
 /** Shared SEO helpers: canonical URLs, absolute asset URLs and JSON-LD builders. */
 
-export const SITE_URL = "https://www.ugalights.com";
+export const SITE_URL = "https://ugalights.com";
 export const SITE_NAME = "UGALights";
 
 /** Absolute URL for a site-relative path. */
