@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://www.ugalights.com/sitemap.xml
+Sitemap: https://ugalights.com/sitemap.xml
